@@ -1,0 +1,90 @@
+{% extends 'authentication/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Edit Student Information</h2>
+
+    <form method="post" action="{% url 'students:edit_student' student.id %}">
+        {% csrf_token %}
+        <div class="form-group mb-3">
+            <label for="first_name">First Name</label>
+            <input type="text" name="first_name" id="first_name" class="form-control" value="{{ student.user.first_name }}" required>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="last_name">Last Name</label>
+            <input type="text" name="last_name" id="last_name" class="form-control" value="{{ student.user.last_name }}" required>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="prn">PRN</label>
+            <input type="text" name="prn" id="prn" class="form-control" value="{{ student.prn }}" required>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="dob">Date of Birth</label>
+            <input type="date" name="dob" id="dob" class="form-control" value="{{ student.dob }}" required>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="gender">Gender</label>
+            <select name="gender" id="gender" class="form-control" required>
+                {% for key, value in student.GenderChoices.choices %}
+                <option value="{{ key }}" {% if student.gender == key %}selected{% endif %}>{{ value }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="phone_number">Phone Number</label>
+            <input type="text" name="phone_number" id="phone_number" class="form-control" value="{{ student.phone_number }}" pattern="\d{10}" title="Phone number must be exactly 10 digits" required>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="program">Program</label>
+            <select name="program" id="program" class="form-control" required>
+                {% for key, value in student.ProgramChoices.choices %}
+                <option value="{{ key }}" {% if student.program == key %}selected{% endif %}>{{ value }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="semester">Semester</label>
+            <select name="semester" id="semester" class="form-control" required>
+                {% for key, value in student.SemesterChoices.choices %}
+                <option value="{{ key }}" {% if student.semester == key %}selected{% endif %}>{{ value }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="street_address">Street Address</label>
+            <textarea name="street_address" id="street_address" class="form-control" required>{{ student.street_address }}</textarea>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="city">City</label>
+            <input type="text" name="city" id="city" class="form-control" value="{{ student.city }}" required>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="state">State</label>
+            <input type="text" name="state" id="state" class="form-control" value="{{ student.state }}" required>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="pincode">Pincode</label>
+            <input type="text" name="pincode" id="pincode" class="form-control" value="{{ student.pincode }}" pattern="\d{6}" title="Pincode must be exactly 6 digits" required>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="country">Country</label>
+            <input type="text" name="country" id="country" class="form-control" value="{{ student.country }}" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a href="{% url 'students:manage_students' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

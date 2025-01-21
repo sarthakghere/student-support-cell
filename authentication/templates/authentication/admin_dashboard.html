@@ -1,0 +1,35 @@
+{% extends 'authentication/base.html' %}
+
+{% block content %}
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Manage Students</h5>
+                        <p class="card-text">View, add, and edit student records.</p>
+                        <a href="{% url 'students:manage_students' %}" class="btn btn-primary">Go to Student Management</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Manage Staff</h5>
+                        <p class="card-text">View, add, and edit staff records.</p>
+                        <a href="#" class="btn btn-primary">Go to Staff Management</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Generate Certificates</h5>
+                        <p class="card-text">Create and issue student certificates like TCs and bonafide certificates.</p>
+                        <a href="#" class="btn btn-primary">Go to Certificate Generation</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
