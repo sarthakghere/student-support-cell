@@ -2,6 +2,12 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Student
+from authentication.models import User
+from .forms import StudentForm
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 # Create your views here.
 @login_required(login_url='authentication:login')
@@ -9,12 +15,12 @@ def student_management(request):
     students = Student.objects.all()
     return render(request, 'students/manage_options.html', {'students': students})
 
-
 @login_required(login_url='authentication:login')
 def view_student(request, pk):
     student = Student.objects.get(pk=pk)
     return render(request, 'students/view_student.html', {'student': student})
 
+@login_required(login_url='authentication:login')
 def edit_student(request, pk):
     student = get_object_or_404(Student, id=pk)
 
@@ -45,7 +51,69 @@ def edit_student(request, pk):
 
     return render(request, 'students/edit_student.html', {'student': student})
 
+@login_required(login_url='authentication:login')
 def delete_student(request, pk):
     student = get_object_or_404(Student, id=pk)
     student.delete()
     return redirect('students:manage_students')
+
+@login_required(login_url='authentication:login')
+def add_student(request):
+    return render(request, 'students/add_student.html')
+
+@login_required(login_url='authentication:login')
+def add_single_student(request):
+    if request.method == "POST":
+        form = StudentForm(request.POST)
+        if form.is_valid():
+            # Extract user-related fields
+            email = form.cleaned_data.get('email')
+            first_name = form.cleaned_data.get('first_name')
+            last_name = form.cleaned_data.get('last_name')
+
+            # Create or retrieve the User instance
+            user, created = User.objects.get_or_create(
+                email=email,
+                defaults={
+                    'first_name': first_name,
+                    'last_name': last_name,
+                    'role': 'student',
+                    'password': os.getenv('DEFAULT_STUDENT_PASSWORD'),
+                }
+            )
+
+            # Create the Student instance and associate it with the User
+            student = Student.objects.create(
+                user=user,
+                prn=form.cleaned_data.get('prn'),
+                phone_number=form.cleaned_data.get('phone_number'),
+                dob=form.cleaned_data.get('dob'),
+                gender=form.cleaned_data.get('gender'),
+                program=form.cleaned_data.get('program'),
+                semester=form.cleaned_data.get('semester'),
+                course_start_year=form.cleaned_data.get('course_start_year'),
+                course_duration=form.cleaned_data.get('course_duration'),
+                caste=form.cleaned_data.get('caste'),
+                religion=form.cleaned_data.get('religion'),
+                nationality=form.cleaned_data.get('nationality'),
+                pan=form.cleaned_data.get('pan'),
+                aadhar=form.cleaned_data.get('aadhar'),
+                abc_id=form.cleaned_data.get('abc_id'),
+                street_address=form.cleaned_data.get('street_address'),
+                city=form.cleaned_data.get('city'),
+                state=form.cleaned_data.get('state'),
+                pincode=form.cleaned_data.get('pincode'),
+                country=form.cleaned_data.get('country'),
+            )
+
+            student.save()
+            messages.success(request, "Student added successfully!")
+            return redirect('students:list_students')  # Replace with the appropriate URL
+        else:
+            messages.error(request, "There was an error with the form. Please correct it.")
+
+    else:
+        form = StudentForm()
+
+    return render(request, 'students/add_single_student.html', {'form': form})
+

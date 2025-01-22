@@ -1,0 +1,66 @@
+{% extends 'students/base.html' %}
+
+{% block title %}
+    Add Student
+{% endblock %}
+
+{% block style %}
+<style>
+    .container {
+        width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-label {
+        display: inline-block;
+        width: 150px;
+        text-align: right;
+        margin-right: 10px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    select,
+    textarea {
+        width: calc(100% - 160px); /* Adjust width as needed */
+        padding: 5px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+    }
+
+    textarea {
+        height: 100px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+    <h1>Student Form</h1>
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="form-group">
+                <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                    <ul class="errors">
+                        {% for error in field.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary">Add Student</button>
+    </form>
+</div>
+{% endblock %}

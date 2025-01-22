@@ -1,0 +1,32 @@
+{% extends 'students/base.html' %}
+
+{% block title %}
+    Add Students
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">Add Students</h2>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Add Students Individually</h5>
+                        <p class="card-text">Use this option to add student details one at a time.</p>
+                        <a href="{% url 'students:add_single_student' %}" class="btn btn-primary">Add Student</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Bulk Add Students</h5>
+                        <p class="card-text">Upload a CSV or Excel file to add multiple students at once.</p>
+                        <a href="#" class="btn btn-secondary">Bulk Add Students</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
