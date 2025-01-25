@@ -1,0 +1,77 @@
+{% extends 'students/base.html' %}
+{% load custom_filters %}
+
+
+{% block title %}
+Preview Students
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center">Preview Students Data</h2>
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>PRN</th>
+                    <th>Phone Number</th>
+                    <th>DOB</th>
+                    <th>Gender</th>
+                    <th>Program</th>
+                    <th>Semester</th>
+                    <th>Caste</th>
+                    <th>Religion</th>
+                    <th>Nationality</th>
+                    <th>PAN</th>
+                    <th>Aadhar</th>
+                    <th>ABC ID</th>
+                    <th>Street Address</th>
+                    <th>City</th>
+                    <th>State</th>
+                    <th>Pincode</th>
+                    <th>Country</th>
+                    <th>Course Duration</th>
+                    <th>Course Start Year</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in student_data %}
+                <tr>
+                    <td>{{ student.email }}</td>
+                    <td>{{ student.first_name }}</td>
+                    <td>{{ student.last_name }}</td>
+                    <td>{{ student.prn }}</td>
+                    <td>{{ student.phone_number }}</td>
+                    <td>{{ student.dob }}</td>
+                    <td>{{ student.gender }}</td>
+                    <td>{{ student.program }}</td>
+                    <td>{{ student.semester }}</td>
+                    <td>{{ student.caste }}</td>
+                    <td>{{ student.religion }}</td>
+                    <td>{{ student.nationality }}</td>
+                    <td>{{ student.pan }}</td>
+                    <td>{{ student.aadhar }}</td>
+                    <td>{{ student.abc_id }}</td>
+                    <td>{{ student.street_address }}</td>
+                    <td>{{ student.city }}</td>
+                    <td>{{ student.state }}</td>
+                    <td>{{ student.pincode }}</td>
+                    <td>{{ student.country }}</td>
+                    <td>{{ student.course_duration }}</td>
+                    <td>{{ student.course_start_year }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <form method="POST" action="{% url 'students:save_bulk_students' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success">Save Students</button>
+    </form>
+</div>
+
+{% endblock %}

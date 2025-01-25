@@ -10,5 +10,6 @@ urlpatterns = [
     path('delete/<int:pk>/', views.delete_student, name='delete_student'),
     path('add/', views.add_student, name='add_student'),
     path('add/single/', views.add_single_student, name='add_single_student'),
-    
+    path('add/bulk-add/upload/', views.bulk_add_students, name='bulk_add_upload'),
+
 ]

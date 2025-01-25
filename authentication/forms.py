@@ -6,3 +6,11 @@ class LoginForm(forms.Form):
 
     USERNAME_FIELD = 'email'  # Use email as the login field
     REQUIRED_FIELDS = []  
+
+class StaffForm(forms.Form):
+    first_name = forms.CharField(max_length=100, required=True, label='First Name')
+    last_name = forms.CharField(max_length=100, required=True, label='Last Name')
+    email = forms.EmailField(max_length=100, required=True, label='Email')
+    password = forms.PasswordInput()
+    confirm_password = forms.PasswordInput()
+    

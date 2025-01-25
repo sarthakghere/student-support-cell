@@ -1,12 +1,18 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.db import transaction
+from django.core.files.storage import FileSystemStorage
+from django.conf import settings
 from .models import Student
 from authentication.models import User
 from .forms import StudentForm
 from dotenv import load_dotenv
 import os
-
+import time
+import pandas as pd
+import json
+import openpyxl
 load_dotenv()
 
 # Create your views here.
@@ -117,3 +123,29 @@ def add_single_student(request):
 
     return render(request, 'students/add_single_student.html', {'form': form})
 
+@login_required(login_url='authentication:login')
+def bulk_add_students(request):
+    if request.method == 'POST' and request.FILES.get('excel_file'):
+        excel_file = request.FILES['excel_file']
+        
+        # Save the file to the filesystem
+        fs = FileSystemStorage()
+        filename = fs.save(excel_file.name, excel_file)
+        file_path = fs.path(filename)  # Get the absolute file path
+        
+        try:
+            # Read the Excel file using pandas
+            df = pd.read_excel(file_path)
+            table_html = df.to_html(classes="table table-striped table-bordered", index=False)
+
+            # Pass the HTML table to the template
+            return render(request, 'students/preview_excel.html', {
+                'table_html': table_html,
+                'file_name': filename  # Pass the file name for future use
+            })
+        except Exception as e:
+            return render(request, 'students/bulk_add_upload.html', {
+                'error': f"Error processing the file: {e}"
+            })
+
+    return render(request, 'students/bulk_add_upload.html')

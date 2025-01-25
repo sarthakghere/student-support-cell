@@ -1,0 +1,20 @@
+{% extends 'students/base.html' %}
+
+{% block title %}
+Upload Excel File
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center">Bulk Add Students</h2>
+    <form method="POST" action="{% url 'students:bulk_add_upload' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="excel_file">Upload Excel File</label>
+            <input type="file" name="excel_file" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Upload</button>
+    </form>
+</div>
+{% endblock %}
+
