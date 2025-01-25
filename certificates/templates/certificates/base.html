@@ -1,0 +1,5 @@
+{% if user.role == 'admin' %}
+    {% extends 'authentication/base.html' %}
+{% elif user.role == 'staff' %}
+    {% extends 'staff/base.html' %}
+{% endif %}
