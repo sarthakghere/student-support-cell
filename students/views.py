@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.db import transaction
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
 from .models import Student
@@ -9,10 +8,7 @@ from authentication.models import User
 from .forms import StudentForm
 from dotenv import load_dotenv
 import os
-import time
 import pandas as pd
-import json
-import openpyxl
 load_dotenv()
 
 # Create your views here.
@@ -72,49 +68,56 @@ def add_single_student(request):
     if request.method == "POST":
         form = StudentForm(request.POST)
         if form.is_valid():
-            # Extract user-related fields
             email = form.cleaned_data.get('email')
+            prn = form.cleaned_data.get('prn')
             first_name = form.cleaned_data.get('first_name')
             last_name = form.cleaned_data.get('last_name')
 
-            # Create or retrieve the User instance
-            user, created = User.objects.get_or_create(
-                email=email,
-                defaults={
-                    'first_name': first_name,
-                    'last_name': last_name,
-                    'role': 'student',
-                    'password': os.getenv('DEFAULT_STUDENT_PASSWORD'),
-                }
-            )
+            # Check if the email already exists
+            if User.objects.filter(email=email).exists():
+                messages.error(request, "A student with this email already exists.")
+            # Check if PRN already exists
+            elif Student.objects.filter(prn=prn).exists():
+                messages.error(request, "A student with this PRN already exists.")
+            else:
+                # Create or retrieve the User instance
+                user, created = User.objects.get_or_create(
+                    email=email,
+                    defaults={
+                        'first_name': first_name,
+                        'last_name': last_name,
+                        'role': 'student',
+                        'password': os.getenv('DEFAULT_STUDENT_PASSWORD'),
+                    }
+                )
 
-            # Create the Student instance and associate it with the User
-            student = Student.objects.create(
-                user=user,
-                prn=form.cleaned_data.get('prn'),
-                phone_number=form.cleaned_data.get('phone_number'),
-                dob=form.cleaned_data.get('dob'),
-                gender=form.cleaned_data.get('gender'),
-                program=form.cleaned_data.get('program'),
-                semester=form.cleaned_data.get('semester'),
-                course_start_year=form.cleaned_data.get('course_start_year'),
-                course_duration=form.cleaned_data.get('course_duration'),
-                caste=form.cleaned_data.get('caste'),
-                religion=form.cleaned_data.get('religion'),
-                nationality=form.cleaned_data.get('nationality'),
-                pan=form.cleaned_data.get('pan'),
-                aadhar=form.cleaned_data.get('aadhar'),
-                abc_id=form.cleaned_data.get('abc_id'),
-                street_address=form.cleaned_data.get('street_address'),
-                city=form.cleaned_data.get('city'),
-                state=form.cleaned_data.get('state'),
-                pincode=form.cleaned_data.get('pincode'),
-                country=form.cleaned_data.get('country'),
-            )
+                # Create the Student instance and associate it with the User
+                student = Student.objects.create(
+                    user=user,
+                    prn=prn,
+                    phone_number=form.cleaned_data.get('phone_number'),
+                    dob=form.cleaned_data.get('dob'),
+                    gender=form.cleaned_data.get('gender'),
+                    program=form.cleaned_data.get('program'),
+                    semester=form.cleaned_data.get('semester'),
+                    course_start_year=form.cleaned_data.get('course_start_year'),
+                    course_duration=form.cleaned_data.get('course_duration'),
+                    caste=form.cleaned_data.get('caste'),
+                    religion=form.cleaned_data.get('religion'),
+                    nationality=form.cleaned_data.get('nationality'),
+                    pan=form.cleaned_data.get('pan'),
+                    aadhar=form.cleaned_data.get('aadhar'),
+                    abc_id=form.cleaned_data.get('abc_id'),
+                    street_address=form.cleaned_data.get('street_address'),
+                    city=form.cleaned_data.get('city'),
+                    state=form.cleaned_data.get('state'),
+                    pincode=form.cleaned_data.get('pincode'),
+                    country=form.cleaned_data.get('country'),
+                )
 
-            student.save()
-            messages.success(request, "Student added successfully!")
-            return redirect('students:list_students')  # Replace with the appropriate URL
+                messages.success(request, "Student added successfully!")
+                return redirect('students:list_students')  # Replace with the appropriate URL
+
         else:
             messages.error(request, "There was an error with the form. Please correct it.")
 

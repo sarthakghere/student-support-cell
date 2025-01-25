@@ -60,7 +60,7 @@ def view_staff(request, pk):
 @login_required(login_url='authentication:login')
 @user_passes_test(is_admin, login_url='authentication:login')
 def add_staff(request):
-    form = StaffForm()  # Initialize the form at the beginning
+    form = StaffForm()  # Initialize the form
 
     if request.method == 'POST':
         form = StaffForm(request.POST)
@@ -71,7 +71,13 @@ def add_staff(request):
             password = form.cleaned_data.get('password')
             confirm_password = form.cleaned_data.get('confirm_password')
 
-            if password == confirm_password:
+            # Check if email already exists
+            if User.objects.filter(email=email).exists():
+                messages.error(request, "A staff member with this email already exists.")
+            elif password != confirm_password:
+                messages.error(request, "Passwords do not match.")
+            else:
+                # Create staff user
                 user = User.objects.create_user(
                     email=email,
                     first_name=first_name,
@@ -81,11 +87,8 @@ def add_staff(request):
                 )
                 messages.success(request, "Staff added successfully!")
                 return redirect('authentication:manage_staff')
-            else:
-                messages.error(request, "Passwords do not match.")
 
     return render(request, 'authentication/staff/add_staff.html', {'form': form})
-
 
 @login_required(login_url='authentication:login')
 @user_passes_test(is_admin, login_url='authentication:login')

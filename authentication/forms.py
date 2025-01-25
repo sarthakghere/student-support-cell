@@ -1,4 +1,5 @@
 from django import forms
+from .models import User
 
 class LoginForm(forms.Form):
     email = forms.EmailField(max_length=100, required=True, label='Email')
@@ -14,6 +15,16 @@ class StaffForm(forms.Form):
     password = forms.CharField(widget=forms.PasswordInput(), required=True, label='Password')
     confirm_password = forms.CharField(widget=forms.PasswordInput(), required=True, label='Confirm Password')
 
+    def __init__(self, *args, instance=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.instance = instance
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exclude(id=self.instance.id if self.instance else None).exists():
+            raise forms.ValidationError("This email is already in use.")
+        return email
+
     def clean(self):
         cleaned_data = super().clean()
         password = cleaned_data.get("password")
@@ -23,4 +34,5 @@ class StaffForm(forms.Form):
             self.add_error('confirm_password', "Passwords do not match")
 
         return cleaned_data
+
     
