@@ -80,7 +80,7 @@ def add_staff(request):
                     role='staff'
                 )
                 messages.success(request, "Staff added successfully!")
-                return redirect('authentication:add_staff')
+                return redirect('authentication:manage_staff')
             else:
                 messages.error(request, "Passwords do not match.")
 
