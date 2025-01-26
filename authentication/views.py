@@ -19,7 +19,7 @@ def user_login(request):
             if user.role == 'admin':
                 return redirect('authentication:admin_dashboard')
             elif user.role == 'staff':
-                return redirect('authentication:staff_dashboard')
+                return redirect('certificates:certificates_home')
             else:
                 messages.error(request, "Unauthorized access.")
                 return redirect('authentication:login')

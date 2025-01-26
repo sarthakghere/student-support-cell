@@ -22,5 +22,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('authentication.urls')),
     path('students/', include('students.urls')),
-    path('', lambda request: redirect('students:manage_students') if request.user.is_authenticated else redirect('authentication:login'), name='home'),
+    path('', lambda request: redirect('authentication:admin_dashboard') if request.user.is_authenticated and request.user.role == 'admin' else redirect('authentication:staff_dashboard') if request.user.is_authenticated and request.user.role == 'staff' else redirect('authentication:login'), name='home'),
+    path('certificates/', include('certificates.urls')),
 ]

@@ -6,28 +6,68 @@
     <title>{% block title %}{% endblock %}</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        /* Ensure the page takes full height */
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+        .wrapper {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .content {
+            flex: 1;
+        }
+        footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: #f8f9fa;
+            padding: 10px;
+            text-align: center;
+            z-index: 1000;
+        }
+        {% block style %}{% endblock %}
 
+    </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="#">SSC</a>
+        {% if user.is_authenticated %}
+            {% if user.role == 'admin' %}
+                <a class="navbar-brand" href="{%  url 'authentication:admin_dashboard' %}">SSC</a>
+            {% elif user.role == 'staff' %}
+                <a class="navbar-brand" href="{%  url 'certificates:certificates_home' %}">SSC</a>
+            {% endif %}
+        {% endif %}
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'students:manage_students' %}">Manage Students</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'authentication:manage_staff' %}">Manage Staff</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Generate Certificates</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'authentication:logout' %}">Logout</a>
-                </li>
+                {% if user.is_authenticated %}
+                    {% if user.role == 'admin' %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'students:manage_students' %}">Manage Students</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'authentication:manage_staff' %}">Manage Staff</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'certificates:certificates_home' %}">Generate Certificates</a>
+                        </li>
+                    {% elif user.role == 'staff'%}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'certificates:certificates_home' %}">Generate Certificates</a>
+                        </li>
+                    {% endif %}
+                
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'authentication:logout' %}">Logout</a>
+                    </li>
+                {% endif %}
             </ul>
         </div>
     </nav>
@@ -48,5 +88,9 @@
     <script src="https://code.jquery.com/jquery-3.5.1.1/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <footer class="footer">
+        <p class="mb-0">Made with ❤️ by Sarthak Gupta 2220100292</p>
+    </footer>
 </body>
 </html>

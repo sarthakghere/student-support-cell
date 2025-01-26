@@ -9,6 +9,8 @@ pymysql = "*"
 python-dotenv = "*"
 openpyxl = "*"
 pandas = "*"
+django-crispy-forms = "*"
+crispy-bootstrap5 = "*"
 
 [dev-packages]
 
