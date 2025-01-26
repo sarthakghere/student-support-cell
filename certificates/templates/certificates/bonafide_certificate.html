@@ -1,0 +1,72 @@
+{% extends 'authentication/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Bonafide Certificate{% endblock %}
+
+{% block style %}
+<style>
+        /* Full-page flexbox layout */
+        html, body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Makes content take available space and pushes the footer down */
+        .content-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Centers the form */
+            align-items: center;
+            padding-bottom: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: white;
+        }
+
+        /* Footer styling */
+        footer {
+            background: #f8f9fa;
+            padding: 10px;
+            text-align: center;
+        }
+
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="container">
+        <h1 class="text-center">Generate Bonafide Certificate</h1>
+        <form method="post" class="mt-4">
+            {% csrf_token %}
+            {{ fetch_student_form|crispy }}
+            <button type="submit" name="fetch_details" class="btn btn-primary w-100">Fetch Student</button>
+        </form>
+    </div>
+</div>
+
+{% if student_data %}
+    
+<div class="content-wrapper">
+    <div class="container">
+        <form method="post" class="mt-4">
+            {% csrf_token %}
+            {{ bonafide_form|crispy }}
+            <button type="submit" name="generate_certificate" class="btn btn-primary w-100">Generate</button>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+
+{% endblock %}
