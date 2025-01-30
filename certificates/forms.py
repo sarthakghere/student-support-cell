@@ -13,3 +13,10 @@ class BonafideCertificateForm(forms.Form):
     course = forms.CharField(label='Course', max_length=100, required=True)
     course_start = forms.IntegerField(label='Course Start', required=True)
     course_end = forms.IntegerField(label='Course End', required=True)
+
+class BacklogForm(forms.Form):
+    subject_name = forms.CharField(max_length=255, label="Subject Name")
+    declared_fail = forms.ChoiceField(choices=Student.SemesterChoices.choices, label="Declared Failed Semester")
+    declared_pass = forms.ChoiceField(choices=Student.SemesterChoices.choices, label="Passing Semester")
+
+BacklogFormSet = forms.formset_factory(BacklogForm, extra=1)

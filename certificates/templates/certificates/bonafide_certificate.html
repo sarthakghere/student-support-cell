@@ -1,6 +1,6 @@
 {% extends 'authentication/base.html' %}
 {% load crispy_forms_tags %}
-
+{% load static %}
 {% block title %}Bonafide Certificate{% endblock %}
 
 {% block style %}
@@ -39,6 +39,10 @@
             text-align: center;
         }
 
+        .btn-primary{
+            margin: 5px;
+        }
+
 </style>
 {% endblock %}
 
@@ -56,17 +60,120 @@
 </div>
 
 {% if student_data %}
-    
 <div class="content-wrapper">
     <div class="container">
         <form method="post" class="mt-4">
             {% csrf_token %}
             {{ bonafide_form|crispy }}
-            <button type="submit" name="generate_certificate" class="btn btn-primary w-100">Generate</button>
+
+            <!-- Ask if the student has backlogs -->
+            <h3>Does the student have any backlogs?</h3>
+            <div>
+                <input type="radio" id="backlog-yes" name="has_backlogs" value="yes">
+                <label for="backlog-yes">Yes</label>
+
+                <input type="radio" id="backlog-no" name="has_backlogs" value="no" checked>
+                <label for="backlog-no">No</label>
+
+            </div>
+
+            <!-- Backlog Section -->
+            <div id="backlog-section" style="display: none; margin-top: 15px;">
+                <h3>Backlog Details</h3>
+
+                <div id="backlog-forms">
+                    <!-- Existing Backlogs will be added here -->
+                </div>
+
+                <button type="button" id="add-backlog" class="btn btn-primary w-50">Add Another Backlog</button>
+
+                <!-- Hidden Input to Store Backlog Data -->
+                <input type="hidden" name="backlog_data" id="backlog-data">
+            </div>
+
+            
+            
+            <button type="submit" name="generate_certificate" class="btn btn-primary w-50">Generate</button>
         </form>
     </div>
 </div>
-{% endif %}
 
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const backlogYes = document.getElementById("backlog-yes");
+        const backlogNo = document.getElementById("backlog-no");
+        const backlogSection = document.getElementById("backlog-section");
+        const addBacklogButton = document.getElementById("add-backlog");
+        const backlogFormsContainer = document.getElementById("backlog-forms");
+        const backlogDataInput = document.getElementById("backlog-data");
+    
+        function toggleBacklogSection() {
+            backlogSection.style.display = backlogYes.checked ? "block" : "none";
+        }
+    
+        backlogYes.addEventListener("change", toggleBacklogSection);
+        backlogNo.addEventListener("change", toggleBacklogSection);
+        
+        toggleBacklogSection(); // Ensure correct visibility on page load
+    
+        addBacklogButton.addEventListener("click", function () {
+            let backlogDiv = document.createElement("div");
+            backlogDiv.classList.add("backlog-entry");
+            
+            backlogDiv.innerHTML = `
+                <label>Subject Name:</label>
+                <input type="text" class="form-control subject-name">
+                
+                <label>Declared Fail:</label>
+                <input type="number" class="form-control declared-fail">
+                
+                <label>Declared Pass:</label>
+                <input type="number" class="form-control declared-pass">
+                
+                <button type="button" class="btn btn-danger remove-backlog">Remove</button>
+            `;
+    
+            backlogFormsContainer.appendChild(backlogDiv);
+            
+            // Add event listener for remove button
+            backlogDiv.querySelector(".remove-backlog").addEventListener("click", function () {
+                backlogDiv.remove();
+                updateBacklogData();
+            });
+    
+            updateBacklogData();
+        });
+    
+        function updateBacklogData() {
+            let backlogEntries = [];
+            document.querySelectorAll(".backlog-entry").forEach(entry => {
+                let subject = entry.querySelector(".subject-name").value;
+                let failCount = entry.querySelector(".declared-fail").value;
+                let passCount = entry.querySelector(".declared-pass").value;
+    
+                if (subject) {
+                    backlogEntries.push({
+                        "subject_name": subject,
+                        "declared_fail": failCount,
+                        "declared_pass": passCount
+                    });
+                }
+            });
+    
+            backlogDataInput.value = JSON.stringify(backlogEntries);
+        }
+    
+        document.addEventListener("input", function (event) {
+            if (event.target.closest(".backlog-entry")) {
+                updateBacklogData();
+            }
+        });
+    });
+    </script>
+    
+
+
+
+{% endif %}
 
 {% endblock %}

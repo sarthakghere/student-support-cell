@@ -116,7 +116,7 @@ def add_single_student(request):
                 )
 
                 messages.success(request, "Student added successfully!")
-                return redirect('students:list_students')  # Replace with the appropriate URL
+                return redirect('students:manage_students')  # Replace with the appropriate URL
 
         else:
             messages.error(request, "There was an error with the form. Please correct it.")
