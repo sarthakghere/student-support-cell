@@ -1,6 +1,5 @@
 {% extends 'authentication/base.html' %}
 {% load crispy_forms_tags %}
-{% load static %}
 {% block title %}Bonafide Certificate{% endblock %}
 
 {% block style %}
@@ -41,6 +40,10 @@
 
         .btn-primary{
             margin: 5px;
+        }
+
+        .remove-backlog {
+            margin-top: 5px;
         }
 
 </style>
@@ -85,7 +88,7 @@
                     <!-- Existing Backlogs will be added here -->
                 </div>
 
-                <button type="button" id="add-backlog" class="btn btn-primary w-50">Add Another Backlog</button>
+                <button type="button" id="add-backlog" class="btn btn-primary w-50">Add Backlog</button>
 
                 <!-- Hidden Input to Store Backlog Data -->
                 <input type="hidden" name="backlog_data" id="backlog-data">

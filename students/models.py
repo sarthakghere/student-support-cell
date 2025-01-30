@@ -98,12 +98,12 @@ class Student(models.Model):
 
 
 class Certificate(models.Model):
-    CERTIFICATE_TYPES = (
-        ('TC', 'Transfer Certificate'),
-        ('CC', 'Character Certificate'),
-        ('BC', 'Bonafide Certificate'),
-    )
-    certificate_type = models.CharField(max_length=2, choices=CERTIFICATE_TYPES)
+
+    class CertificateTypes(models.TextChoices):
+        TC = "TC", "Transfer Certificate"
+        CC = "CC", "Character Certificate"
+        BC = "BC", "Bonafide Certificate"
+    certificate_type = models.CharField(max_length=2, choices=CertificateTypes.choices)
     issued_to = models.ForeignKey(
         Student, on_delete=models.CASCADE, related_name='certificates'
     )
