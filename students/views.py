@@ -5,7 +5,7 @@ from django.core.files.storage import FileSystemStorage
 from django.conf import settings
 from .models import Student
 from authentication.models import User
-from .forms import StudentForm
+from .forms import StudentForm, EditStudentForm
 from dotenv import load_dotenv
 import os
 import pandas as pd
@@ -25,33 +25,73 @@ def view_student(request, pk):
 @login_required(login_url='authentication:login')
 def edit_student(request, pk):
     student = get_object_or_404(Student, id=pk)
+    data = {
+        'prn': student.prn,
+        'email': student.user.email,
+
+        'first_name': student.user.first_name,
+        'middle_name': student.user.middle_name,
+        'last_name': student.user.last_name,
+
+        'dob': student.dob,
+        'gender': student.gender,
+        'phone_number': student.phone_number,
+        'caste': student.caste,
+        'religion': student.religion,
+        'nationality': student.nationality,
+
+        'program': student.program,
+        'semester': student.semester,
+
+        'adhar': student.aadhar,
+        'pan': student.pan,
+        'abc_id': student.abc_id,
+
+        'street_address': student.street_address,
+        'city': student.city,
+        'state': student.state,
+        'pincode': student.pincode,
+        'country': student.country,
+    }
+    
+    form = EditStudentForm(initial=data)
 
     if request.method == "POST":
+        form = EditStudentForm(request.POST)
+        if not form.is_valid():
+            messages.error(request, "There was an error with the form. Please correct it.")
+            return render(request, 'students/edit_student.html', {'student': student, 'form': form})
+        
         # Update Student User Details
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
+        first_name = form.cleaned_data.get('first_name')
+        middle_name = form.cleaned_data.get('middle_name')
+        last_name = form.cleaned_data.get('last_name')
         student.user.first_name = first_name
+        student.user.middle_name = middle_name
         student.user.last_name = last_name
         student.user.save()
 
         # Update Student Details
-        student.prn = request.POST.get('prn')
-        student.dob = request.POST.get('dob')
-        student.gender = request.POST.get('gender')
-        student.phone_number = request.POST.get('phone_number')
-        student.program = request.POST.get('program')
-        student.semester = request.POST.get('semester')
-        student.street_address = request.POST.get('street_address')
-        student.city = request.POST.get('city')
-        student.state = request.POST.get('state')
-        student.pincode = request.POST.get('pincode')
-        student.country = request.POST.get('country')
+        student.dob = form.cleaned_data.get('dob')
+        student.gender = form.cleaned_data.get('gender')
+        student.phone_number = form.cleaned_data.get('phone_number')
+        student.caste = form.cleaned_data.get('caste')
+        student.religion = form.cleaned_data.get('religion')
+        student.nationality = form.cleaned_data.get('nationality')
+        
+        student.program = form.cleaned_data.get('program')
+        student.semester = form.cleaned_data.get('semester')
+        student.street_address = form.cleaned_data.get('street_address')
+        student.city = form.cleaned_data.get('city')
+        student.state = form.cleaned_data.get('state')
+        student.pincode = form.cleaned_data.get('pincode')
+        student.country = form.cleaned_data.get('country')
         student.save()
 
         messages.success(request, "Student information updated successfully!")
         return redirect('students:manage_students')  # Redirect to the student list page
 
-    return render(request, 'students/edit_student.html', {'student': student})
+    return render(request, 'students/edit_student.html', {'student': student, 'form': form})
 
 @login_required(login_url='authentication:login')
 def delete_student(request, pk):
