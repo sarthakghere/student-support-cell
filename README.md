@@ -45,8 +45,7 @@ The **Student Support Cell Management System** is a web application developed us
 
 2. **Create a virtual environment**:
    ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
+   pipenv shell
    ```
 
 3. **Install dependencies**:

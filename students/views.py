@@ -75,9 +75,11 @@ def add_single_student(request):
 
             # Check if the email already exists
             if User.objects.filter(email=email).exists():
+                form.add_error('email', "A student with this email already exists.")
                 messages.error(request, "A student with this email already exists.")
             # Check if PRN already exists
             elif Student.objects.filter(prn=prn).exists():
+                form.add_error('prn', "A student with this PRN already exists.")
                 messages.error(request, "A student with this PRN already exists.")
             else:
                 # Create or retrieve the User instance
@@ -128,27 +130,77 @@ def add_single_student(request):
 
 @login_required(login_url='authentication:login')
 def bulk_add_students(request):
+    table_html = None
+    file_name = None
+
     if request.method == 'POST' and request.FILES.get('excel_file'):
         excel_file = request.FILES['excel_file']
         
-        # Save the file to the filesystem
+        # Save the file temporarily
         fs = FileSystemStorage()
         filename = fs.save(excel_file.name, excel_file)
-        file_path = fs.path(filename)  # Get the absolute file path
+        file_path = fs.path(filename)  # Get the absolute path
         
         try:
-            # Read the Excel file using pandas
+            # Read the Excel file
             df = pd.read_excel(file_path)
             table_html = df.to_html(classes="table table-striped table-bordered", index=False)
-
-            # Pass the HTML table to the template
-            return render(request, 'students/preview_excel.html', {
-                'table_html': table_html,
-                'file_name': filename  # Pass the file name for future use
-            })
+            file_name = filename  # Pass file name to keep track
         except Exception as e:
             return render(request, 'students/bulk_add_upload.html', {
                 'error': f"Error processing the file: {e}"
             })
 
-    return render(request, 'students/bulk_add_upload.html')
+    return render(request, 'students/bulk_add_upload.html', {
+        'table_html': table_html,
+        'file_name': file_name
+    })
+
+@login_required(login_url='authentication:login')
+def bulk_add_confirm(request, file_name):
+    file_path = os.path.join(settings.MEDIA_ROOT, file_name)
+    df = pd.read_excel(file_path)
+
+    try:
+        for index, row in df.iterrows():
+            # Create or retrieve the User instance
+            user, created = User.objects.get_or_create(
+                email=row['email'],
+                defaults={
+                    'first_name': row['first_name'],
+                    'last_name': row['last_name'],
+                    'role': 'student',
+                    'password': os.getenv('DEFAULT_STUDENT_PASSWORD'),
+                }
+            )
+
+            # Create the Student instance and associate it with the User
+            student = Student.objects.create(
+                user=user,
+                prn=row['prn'],
+                phone_number=row['phone_number'],
+                dob=row['dob'],
+                gender=row['gender'],
+                program=row['program'],
+                semester=row['semester'],
+                course_start_year=row['course_start_year'],
+                course_duration=row['course_duration'],
+                caste=row['caste'],
+                religion=row['religion'],
+                nationality=row['nationality'],
+                pan=row['pan'],
+                aadhar=row['aadhar'],
+                abc_id=row['abc_id'],
+                street_address=row['street_address'],
+                city=row['city'],
+                state=row['state'],
+                pincode=row['pincode'],
+                country=row['country'],
+            )
+    except Exception as e:
+        messages.error(request, f"Error adding students: {e}")
+        return redirect('students:bulk_add_upload')
+    
+    else:
+        messages.success(request, "Students added successfully!")
+        return redirect('students:manage_students')  

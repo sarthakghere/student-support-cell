@@ -80,7 +80,8 @@ class StudentForm(forms.Form):
         validators=[RegexValidator(
             regex=r'^[A-Z]{5}\d{4}[A-Z]{1}$',
             message="PAN must follow the format: 5 letters, 4 digits, 1 letter (e.g., ABCDE1234F)."
-        )]
+        )],
+        required=False
     )
     aadhar = forms.CharField(
         max_length=12,
@@ -88,11 +89,13 @@ class StudentForm(forms.Form):
         validators=[RegexValidator(
             regex=r'^\d{12}$',
             message="Aadhar must be exactly 12 digits."
-        )]
+        )],
+        required=False
     )
     abc_id = forms.CharField(
         max_length=20,
-        label="ABC ID"
+        label="ABC ID",
+        required=False
     )
     street_address = forms.CharField(
         widget=forms.TextInput,

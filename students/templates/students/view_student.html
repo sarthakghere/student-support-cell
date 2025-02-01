@@ -1,5 +1,21 @@
 {% extends 'authentication/base.html' %}
 
+{% block style %}
+
+
+    body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh; 
+    }
+
+    .container {
+        flex: 1; 
+        padding-bottom: 50px;
+    }
+
+{% endblock %}
+
 {% block content %}
     <div class="container mt-5">
         <h2 class="mb-4">Student Details</h2>

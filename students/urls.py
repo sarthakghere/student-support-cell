@@ -11,5 +11,6 @@ urlpatterns = [
     path('add/', views.add_student, name='add_student'),
     path('add/single/', views.add_single_student, name='add_single_student'),
     path('add/bulk-add/upload/', views.bulk_add_students, name='bulk_add_upload'),
+    path('add/bulk-add/confirm/<str:file_name>/', views.bulk_add_confirm, name='bulk_add_confirm'),
 
 ]

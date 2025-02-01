@@ -30,6 +30,25 @@
             text-align: center;
             z-index: 1000;
         }
+
+        .table-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 80vh; 
+        }
+
+        .table-responsive {
+        max-height: 60vh; 
+        overflow-y: auto; 
+        }
+
+
+    .table {
+        width: 100%; /* Adjust width as needed */
+        margin: auto; /* Center horizontally */
+    }
+
         {% block style %}{% endblock %}
 
     </style>
