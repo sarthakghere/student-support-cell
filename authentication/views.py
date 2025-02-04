@@ -116,4 +116,6 @@ def edit_staff(request, pk):
 
     return render(request, 'authentication/staff/edit_staff.html', {'staff': staff})
 
-
+@login_required(login_url='authentication:login')
+def credits(request):
+    return render(request, 'authentication/credits.html')
