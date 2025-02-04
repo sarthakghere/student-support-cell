@@ -119,7 +119,7 @@ class Certificate(models.Model):
     )
 
     def __str__(self):
-        return f"{self.get_certificate_type_display()} for {self.issued_to.first_name} {self.issued_to.last_name}"
+        return f"{self.get_certificate_type_display()} for {self.issued_to.user.first_name} {self.issued_to.user.last_name}"
 
     class Meta:
         ordering = ['-issue_date']
