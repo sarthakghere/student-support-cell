@@ -6,4 +6,6 @@ app_name = 'certificates'
 urlpatterns = [
     path('', views.certificates, name='certificates_home'),
     path('bonafide-certificate/', views.bonafide_certificate, name='bonafide_certificate'),
+    path('download-certificate/<int:certificate_id>/', views.download_certificate, name='download_certificate'),
+
 ]

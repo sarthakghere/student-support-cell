@@ -94,10 +94,13 @@
                 <input type="hidden" name="backlog_data" id="backlog-data">
             </div>
 
-            
-            
             <button type="submit" name="generate_certificate" class="btn btn-primary w-50">Generate</button>
         </form>
+
+        {% if certificate %}
+        <a href="{%  url 'certificates:download_certificate' certificate.id %}" download class="btn btn-primary w-50">Download Certificate</a>
+        {% endif %}
+
     </div>
 </div>
 

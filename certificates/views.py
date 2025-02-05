@@ -1,5 +1,7 @@
 from django.shortcuts import render
 from django.http import FileResponse
+from django.contrib import messages
+from django.utils.safestring import mark_safe
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.forms import formset_factory
 from students.models import Student, Certificate
@@ -27,6 +29,7 @@ def bonafide_certificate(request):
     backlog_formset = BacklogFormSet()  # Always initialize the formset
     student_data = None
     has_backlogs = None  
+    certificate = None
 
     if request.method == "POST":
         if "fetch_details" in request.POST: 
@@ -67,18 +70,34 @@ def bonafide_certificate(request):
 
             if bonafide_form.is_valid():
                 student_data = bonafide_form.cleaned_data
-                certificate_path = generate_bonafide_certificate(student_data, backlog_data)
+                student = Student.objects.get(prn=student_data["PRN"])
+                
+                # Check if a Bonafide Certificate already exists for this student
+                existing_certificate = Certificate.objects.filter(
+                    issued_to=student, certificate_type=Certificate.CertificateTypes.BC
+                ).first()
+                
+                if existing_certificate:
+                    link = f"<a href='/certificates/download-certificate/{existing_certificate.id}/'>Click Here to download.</a>"
+                    messages.warning(request, mark_safe(f"Bonafide Certificate already exists. {link}"))
+                else:
+                    # Generate and save the certificate if it does not exist
+                    certificate_path = generate_bonafide_certificate(student_data, backlog_data)
 
-                if certificate_path:
-                    certificate = Certificate.objects.create(
-                        issued_to=Student.objects.get(prn=student_data["PRN"]),
-                        certificate_type=Certificate.CertificateTypes.BC,
-                        file_path=certificate_path,
-                        issued_by=request.user,
-                        details = f"Bonafide Certificate for {student_data['first_name']} {student_data['last_name']} PRN: {student_data['PRN']}"
-                    )
-                    certificate.save()
-                    return FileResponse(open(certificate_path, "rb"), as_attachment=True)
+                    if certificate_path:
+                        certificate = Certificate.objects.create(
+                            issued_to=student,
+                            certificate_type=Certificate.CertificateTypes.BC,
+                            file_path=certificate_path,
+                            issued_by=request.user,
+                            details=f"Bonafide Certificate for {student_data['first_name']} {student_data['last_name']} PRN: {student_data['PRN']}"
+                        )
+                        certificate.save()
+
+                        link = f"<a href='/certificates/download-certificate/{certificate.id}/'>Click Here to download.</a>"
+                        messages.success(request, mark_safe(f"Bonafide Certificate generated successfully. {link}"))
+
+                    # return FileResponse(open(certificate_path, "rb"), as_attachment=True)
 
     return render(request, "certificates/bonafide_certificate.html", {
         "fetch_student_form": fetch_student_form,
@@ -86,4 +105,11 @@ def bonafide_certificate(request):
         "backlog_formset": backlog_formset,  
         "student_data": student_data,
         "has_backlogs": has_backlogs,
+        "certificate": certificate
     })
+
+@login_required(login_url='authentication:login')
+@user_passes_test(is_authorized, login_url='authentication:login')
+def download_certificate(request, certificate_id):
+    certificate = Certificate.objects.get(id=certificate_id)
+    return FileResponse(open(certificate.file_path, "rb"), as_attachment=True)
