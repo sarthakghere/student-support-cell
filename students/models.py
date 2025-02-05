@@ -104,6 +104,11 @@ class Certificate(models.Model):
         CC = "CC", "Character Certificate"
         BC = "BC", "Bonafide Certificate"
 
+    class StatusChoices(models.TextChoices):
+        PENDING = "pending", "Pending"
+        APPROVED = "approved", "Approved"
+        REJECTED = "rejected", "Rejected"
+
     class IsDuplicate(models.TextChoices):
         YES = "Y", "Yes"
         NO = "N", "No"
@@ -116,13 +121,17 @@ class Certificate(models.Model):
         User, on_delete=models.SET_NULL, null=True, related_name='issued_certificates'
     )
     issue_date = models.DateField(default=date.today)
-    is_duplicate = models.CharField(max_length=1, choices=IsDuplicate.choices, default=IsDuplicate.NO)
     details = models.TextField(blank=True, null=True)
     file_path = models.CharField(
         max_length=255, 
         blank=True, 
         null=True, 
     )
+    is_duplicate = models.CharField(max_length=1, choices=IsDuplicate.choices, default=IsDuplicate.NO)
+    approval_status = models.CharField(max_length=10, choices=StatusChoices.choices)  # Default for originals
+    approved_by = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='approved_certificates')
+    requested_on = models.DateTimeField(auto_now_add=True)
+    approved_on = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.get_certificate_type_display()} for {self.issued_to.user.first_name} {self.issued_to.user.last_name}"

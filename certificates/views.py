@@ -114,6 +114,7 @@ def bonafide_certificate(request):
                         certificate_type=Certificate.CertificateTypes.BC,
                         file_path=certificate_path,
                         issued_by=request.user,
+                        approval_status=Certificate.StatusChoices.APPROVED,
                         details=f"Bonafide Certificate for {student_data['first_name']} {student_data['last_name']} PRN: {student_data['PRN']}"
                     )
                     download_link = f"<a href='/certificates/download-certificate/{certificate.id}/'>Click Here to download.</a>"
