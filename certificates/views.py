@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import FileResponse
 from django.contrib import messages
+from django.db.models import Q
 from django.utils.safestring import mark_safe
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.forms import formset_factory
@@ -45,6 +46,11 @@ def get_student_initial_data(student):
         "course_end": student.course_start_year + student.course_duration,
     }
 
+@login_required(login_url='authentication:login')
+@user_passes_test(is_authorized, login_url='authentication:login')
+def download_certificate(request, certificate_id):
+    certificate = get_object_or_404(Certificate, id=certificate_id)
+    return FileResponse(open(certificate.file_path, "rb"), as_attachment=True)
 
 @login_required(login_url='authentication:login')
 @user_passes_test(is_authorized, login_url='authentication:login')
@@ -128,6 +134,23 @@ def bonafide_certificate(request):
 
 @login_required(login_url='authentication:login')
 @user_passes_test(is_authorized, login_url='authentication:login')
-def download_certificate(request, certificate_id):
-    certificate = get_object_or_404(Certificate, id=certificate_id)
-    return FileResponse(open(certificate.file_path, "rb"), as_attachment=True)
+def approved_duplicate_certificate(request):
+    search_query = request.GET.get('search', '').strip()
+    
+    # Filter certificates based on search query
+    certificates = Certificate.objects.filter(is_duplicate=Certificate.IsDuplicate.YES)
+    certificate = certificates.first()
+
+    if search_query:
+        certificates = certificates.filter(is_duplicate=Certificate.IsDuplicate.YES).filter(
+            Q(certificate_type__icontains=search_query) |
+            Q(issued_to__prn__icontains=search_query) |
+            Q(issued_by__first_name__icontains=search_query) |
+            Q(issued_by__last_name__icontains=search_query)
+        )
+
+    context = {
+        "certificates": certificates,
+    }
+    return render(request, 'certificates/approved_duplicate_certificates.html', context)
+

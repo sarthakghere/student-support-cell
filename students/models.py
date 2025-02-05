@@ -103,6 +103,11 @@ class Certificate(models.Model):
         TC = "TC", "Transfer Certificate"
         CC = "CC", "Character Certificate"
         BC = "BC", "Bonafide Certificate"
+
+    class IsDuplicate(models.TextChoices):
+        YES = "Y", "Yes"
+        NO = "N", "No"
+    
     certificate_type = models.CharField(max_length=2, choices=CertificateTypes.choices)
     issued_to = models.ForeignKey(
         Student, on_delete=models.CASCADE, related_name='certificates'
@@ -111,6 +116,7 @@ class Certificate(models.Model):
         User, on_delete=models.SET_NULL, null=True, related_name='issued_certificates'
     )
     issue_date = models.DateField(default=date.today)
+    is_duplicate = models.CharField(max_length=1, choices=IsDuplicate.choices, default=IsDuplicate.NO)
     details = models.TextField(blank=True, null=True)
     file_path = models.CharField(
         max_length=255, 

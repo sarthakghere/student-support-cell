@@ -1,0 +1,57 @@
+{% extends 'authentication/base.html' %}
+
+{% block title %}Approved Duplicate Certificates{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <h2 class="mb-4">Approved Duplicate Certificates</h2>
+
+    <form method="GET" class="mb-3">
+        <div class="row">
+            <div class="col-md-4">
+                <input type="text" name="search" class="form-control" placeholder="Search by Certificate Type, PRN, or Issuer" value="{{ request.GET.search }}">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Certificate Type</th>
+                    <th scope="col">Issued To</th>
+                    <th scope="col">Issued By</th>
+                    <th scope="col">Issued On</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for certificate in certificates %}
+                    <tr>
+                        <th scope="row">{{ forloop.counter }}</th>
+                        <td>{{ certificate.get_certificate_type_display }}</td>
+                        <td><a href="{% url 'students:view_student' certificate.issued_to.id %}">{{ certificate.issued_to.prn }}</a></td>
+                        <td>{{ certificate.issued_by.email }}</td>
+                        <td>{{ certificate.issue_date }}</td>
+                        <td>
+                            <!-- Download Button -->
+                            <a href="{% url 'certificates:download_certificate' certificate.id %}" class="btn btn-info btn-sm">Download</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">No certificates found.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+{% endblock %}
