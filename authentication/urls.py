@@ -14,5 +14,6 @@ urlpatterns = [
     path('edit/<int:pk>/', views.edit_staff, name='edit_staff'),
     path('delete/<int:pk>/', views.delete_staff, name='delete_staff'),
     path('credits/', views.credits, name='credits'),
-
+    path('approve-duplicate-certificate/', views.approve__duplicate_certificate, name='approve_duplicate_certificates'),
+    
 ]

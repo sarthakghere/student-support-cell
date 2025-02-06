@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .models import User
 from .forms import LoginForm, StaffForm
+from students.models import Certificate
 
 def is_admin(user):
     return user.is_authenticated and user.role == 'admin'
@@ -119,3 +120,9 @@ def edit_staff(request, pk):
 @login_required(login_url='authentication:login')
 def credits(request):
     return render(request, 'authentication/credits.html')
+
+@login_required(login_url='authentication:login')
+@user_passes_test(is_admin, login_url='authentication:login')
+def approve__duplicate_certificate(request):
+    certificates = Certificate.objects.filter(approval_status=Certificate.StatusChoices.PENDING)
+    return render(request, 'authentication/approve_duplicate_certificates.html', {'certificates': certificates})

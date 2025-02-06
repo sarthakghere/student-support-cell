@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import FileResponse
 from django.contrib import messages
 from django.db.models import Q
@@ -13,6 +13,9 @@ import json
 # Create your views here.
 def is_authorized(user):
     return user.is_authenticated and (user.role == 'admin' or user.role == 'staff')
+
+def is_admin(user):
+    return user.is_authenticated and user.role == 'admin'
 
 
 @login_required(login_url='authentication:login')
@@ -99,6 +102,7 @@ def bonafide_certificate(request):
 
         if bonafide_form.is_valid():
             student_data = bonafide_form.cleaned_data
+            bonafide_form = None
             student = get_object_or_404(Student, prn=student_data["PRN"])
             existing_certificate = Certificate.objects.filter(
                 issued_to=student, certificate_type=Certificate.CertificateTypes.BC
@@ -155,3 +159,20 @@ def approved_duplicate_certificate(request):
     }
     return render(request, 'certificates/approved_duplicate_certificates.html', context)
 
+@login_required(login_url='authentication:login')
+@user_passes_test(is_admin, login_url='authentication:login')
+def approve_certificate(request, certificate_id):
+    certificate = get_object_or_404(Certificate, id=certificate_id)
+    certificate.approval_status = Certificate.StatusChoices.APPROVED
+    certificate.save()
+    messages.success(request, "Certificate approved successfully.")
+    return redirect('authentication:approve_duplicate_certificates')
+
+@login_required(login_url='authentication:login')
+@user_passes_test(is_admin, login_url='authentication:login')
+def reject_certificate(request, certificate_id):
+    certificate = get_object_or_404(Certificate, id=certificate_id)
+    certificate.approval_status = Certificate.StatusChoices.REJECTED
+    certificate.save()
+    messages.success(request, "Certificate rejected.")
+    return redirect('authentication:approve_duplicate_certificates')
