@@ -82,6 +82,9 @@ class Student(models.Model):
     family_income = models.FloatField(null=True, blank=True)
     previous_academic_stream = models.CharField(max_length=50, null=True, blank=True)
 
+    added_on = models.DateTimeField(auto_now_add=True)
+    updated_on = models.DateTimeField(auto_now=True)
+
 
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name}"
