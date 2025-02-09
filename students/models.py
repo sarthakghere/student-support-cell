@@ -72,7 +72,7 @@ class Student(models.Model):
     
     abc_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
 
-    permament_address = models.TextField()
+    permanent_address = models.TextField()
     current_address = models.TextField()
     state = models.CharField(max_length=50)
 
