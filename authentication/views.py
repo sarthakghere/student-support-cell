@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .models import User
-from .forms import LoginForm, StaffForm
+from .forms import LoginForm, StaffForm, StaffEditForm
 from students.models import Certificate
 
 def is_admin(user):
@@ -67,22 +67,21 @@ def add_staff(request):
         form = StaffForm(request.POST)
         if form.is_valid():
             email = form.cleaned_data.get('email')
-            first_name = form.cleaned_data.get('first_name')
-            last_name = form.cleaned_data.get('last_name')
+            full_name = form.cleaned_data.get('full_name')
             password = form.cleaned_data.get('password')
             confirm_password = form.cleaned_data.get('confirm_password')
 
             # Check if email already exists
             if User.objects.filter(email=email).exists():
                 messages.error(request, "A staff member with this email already exists.")
+
             elif password != confirm_password:
                 messages.error(request, "Passwords do not match.")
             else:
                 # Create staff user
                 user = User.objects.create_user(
                     email=email,
-                    first_name=first_name,
-                    last_name=last_name,
+                    full_name=full_name,
                     password=password,
                     role='staff'
                 )
@@ -102,20 +101,32 @@ def delete_staff(request, pk):
 @user_passes_test(is_admin, login_url='authentication:login')
 def edit_staff(request, pk):
     staff = get_object_or_404(User, id=pk, role='staff')
+    data = {
+        'full_name': staff.full_name,
+        'email': staff.email,
+    }
+    form = StaffEditForm(initial=data)
 
     if request.method == "POST":
+        form = StaffEditForm(request.POST)
         # Update Staff User Details
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
-        staff.first_name = first_name
-        staff.last_name = last_name
-        staff.email = request.POST.get('email')
-        staff.save()
+        if form.is_valid():
 
-        messages.success(request, "Student information updated successfully!")
-        return redirect('authentication:manage_staff')  # Redirect to the student list page
+            full_name = form.cleaned_data.get('full_name')
+            email = form.cleaned_data.get('email')
 
-    return render(request, 'authentication/staff/edit_staff.html', {'staff': staff})
+            if User.objects.filter(email=email).exclude(id=staff.id).exists():
+                form.add_error('email', "This email is already in use.")
+                return render(request, 'authentication/staff/edit_staff.html', {'staff': staff, 'form': form})
+            
+            staff.full_name = full_name
+            staff.email = email
+            staff.save()
+            messages.success(request, "Staff information updated successfully!")
+
+            return redirect('authentication:manage_staff')  # Redirect to the staff list page
+
+    return render(request, 'authentication/staff/edit_staff.html', {'staff': staff, 'form': form})
 
 @login_required(login_url='authentication:login')
 def credits(request):

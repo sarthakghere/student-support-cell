@@ -28,7 +28,7 @@ Staff Management
                     {% for staff in staffs %}
                         <tr>
                             <th scope="row">{{ forloop.counter }}</th>
-                            <td>{{ staff.first_name }} {{ staff.last_name }}</td>
+                            <td>{{ staff.full_name }}</td>
                             <td>{{ staff.email }}</td>
                             <td>
                                 <!-- View Button -->

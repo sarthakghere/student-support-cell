@@ -9,8 +9,7 @@ class LoginForm(forms.Form):
     REQUIRED_FIELDS = []  
 
 class StaffForm(forms.Form):
-    first_name = forms.CharField(max_length=100, required=True, label='First Name')
-    last_name = forms.CharField(max_length=100, required=True, label='Last Name')
+    full_name = forms.CharField(max_length=100, required=True, label='Full Name')
     email = forms.EmailField(max_length=100, required=True, label='Email')
     password = forms.CharField(widget=forms.PasswordInput(), required=True, label='Password')
     confirm_password = forms.CharField(widget=forms.PasswordInput(), required=True, label='Confirm Password')
@@ -35,4 +34,6 @@ class StaffForm(forms.Form):
 
         return cleaned_data
 
-    
+class StaffEditForm(forms.Form):
+    full_name = forms.CharField(max_length=100, required=True, label='Full Name')
+    email = forms.EmailField(max_length=100, required=True, label='Email')
