@@ -27,34 +27,39 @@ def edit_student(request, pk):
     student = get_object_or_404(Student, id=pk)
     data = {
         'prn': student.prn,
-        'email': student.user.email,
-
-        'first_name': student.user.first_name,
-        'middle_name': student.user.middle_name,
-        'last_name': student.user.last_name,
-
-        'dob': student.dob,
-        'gender': student.gender,
+        'erp': student.erp,
+        'full_name': student.user.full_name,
         'phone_number': student.phone_number,
-        'caste': student.caste,
-        'religion': student.religion,
-        'nationality': student.nationality,
+        'email': student.user.email,
+        'abc_id': student.abc_id,
+        'gender' : student.gender,
+        'dob': student.dob,
+
+        'alternate_phone_number': student.alternate_phone_number,
+        'fathers_name': student.fathers_name,
+        'fathers_contact': student.fathers_contact,
+        'mothers_name': student.mothers_name,
+        'mothers_contact': student.mothers_contact,
+
+        'category': student.category,
+        'disability': student.disability,
+        'cet_rank': student.cet_rank,
+        'special_quota': student.special_quota,
+        'family_income': student.family_income,
+        'previous_academic_stream': student.previous_academic_stream,
 
         'program': student.program,
         'semester': student.semester,
+        'course_start_year': student.course_start_year,
+        'course_duration': student.course_duration,
 
-        'adhar': student.aadhar,
-        'pan': student.pan,
-        'abc_id': student.abc_id,
-
-        'street_address': student.street_address,
-        'city': student.city,
+        'permanent_address': student.permanent_address,
+        'current_address': student.current_address,
         'state': student.state,
-        'pincode': student.pincode,
-        'country': student.country,
     }
     
     form = EditStudentForm(initial=data)
+
 
     if request.method == "POST":
         form = EditStudentForm(request.POST)
@@ -63,29 +68,36 @@ def edit_student(request, pk):
             return render(request, 'students/edit_student.html', {'student': student, 'form': form})
         
         # Update Student User Details
-        first_name = form.cleaned_data.get('first_name')
-        middle_name = form.cleaned_data.get('middle_name')
-        last_name = form.cleaned_data.get('last_name')
-        student.user.first_name = first_name
-        student.user.middle_name = middle_name
-        student.user.last_name = last_name
+        full_name = form.cleaned_data.get('full_name')
+        student.user.first_name = full_name
         student.user.save()
 
         # Update Student Details
         student.dob = form.cleaned_data.get('dob')
         student.gender = form.cleaned_data.get('gender')
         student.phone_number = form.cleaned_data.get('phone_number')
-        student.caste = form.cleaned_data.get('caste')
-        student.religion = form.cleaned_data.get('religion')
-        student.nationality = form.cleaned_data.get('nationality')
+        
+        student.alternate_phone_number = form.cleaned_data.get('alternate_phone_number')
+        student.fathers_name = form.cleaned_data.get('fathers_name')
+        student.fathers_contact = form.cleaned_data.get('fathers_contact')
+        student.mothers_name = form.cleaned_data.get('mothers_name')
+        student.mothers_contact = form.cleaned_data.get('mothers_contact')
+
+        student.category = form.cleaned_data.get('category')
+        student.disability = form.cleaned_data.get('disability')
+        student.cet_rank = form.cleaned_data.get('cet_rank')
+        student.special_quota = form.cleaned_data.get('special_quota')
+        student.family_income = form.cleaned_data.get('family_income')
         
         student.program = form.cleaned_data.get('program')
         student.semester = form.cleaned_data.get('semester')
-        student.street_address = form.cleaned_data.get('street_address')
-        student.city = form.cleaned_data.get('city')
+        student.course_duration = form.cleaned_data.get('course_duration')
+        student.course_start_year = form.cleaned_data.get('course_start_year')
+
+        student.permanent_address = form.cleaned_data.get('permanent_address')
+        student.current_address = form.cleaned_data.get('current_address')
         student.state = form.cleaned_data.get('state')
-        student.pincode = form.cleaned_data.get('pincode')
-        student.country = form.cleaned_data.get('country')
+
         student.save()
 
         messages.success(request, "Student information updated successfully!")
@@ -110,8 +122,7 @@ def add_single_student(request):
         if form.is_valid():
             email = form.cleaned_data.get('email')
             prn = form.cleaned_data.get('prn')
-            first_name = form.cleaned_data.get('first_name')
-            last_name = form.cleaned_data.get('last_name')
+            full_name = form.cleaned_data.get('full_name')
 
             # Check if the email already exists
             if User.objects.filter(email=email).exists():
@@ -126,8 +137,7 @@ def add_single_student(request):
                 user, created = User.objects.get_or_create(
                     email=email,
                     defaults={
-                        'first_name': first_name,
-                        'last_name': last_name,
+                        'full_name': full_name,
                         'role': 'student',
                         'password': os.getenv('DEFAULT_STUDENT_PASSWORD'),
                     }
@@ -137,24 +147,33 @@ def add_single_student(request):
                 student = Student.objects.create(
                     user=user,
                     prn=prn,
-                    phone_number=form.cleaned_data.get('phone_number'),
-                    dob=form.cleaned_data.get('dob'),
-                    gender=form.cleaned_data.get('gender'),
-                    program=form.cleaned_data.get('program'),
-                    semester=form.cleaned_data.get('semester'),
-                    course_start_year=form.cleaned_data.get('course_start_year'),
-                    course_duration=form.cleaned_data.get('course_duration'),
-                    caste=form.cleaned_data.get('caste'),
-                    religion=form.cleaned_data.get('religion'),
-                    nationality=form.cleaned_data.get('nationality'),
-                    pan=form.cleaned_data.get('pan'),
-                    aadhar=form.cleaned_data.get('aadhar'),
-                    abc_id=form.cleaned_data.get('abc_id'),
-                    street_address=form.cleaned_data.get('street_address'),
-                    city=form.cleaned_data.get('city'),
-                    state=form.cleaned_data.get('state'),
-                    pincode=form.cleaned_data.get('pincode'),
-                    country=form.cleaned_data.get('country'),
+                    erp = form.cleaned_data.get('erp'),
+                    abc_id = form.cleaned_data.get('abc_id'),
+                    dob = form.cleaned_data.get('dob'),
+                    gender = form.cleaned_data.get('gender'),
+
+                    phone_number = form.cleaned_data.get('phone_number'),
+                    alternate_phone_number = form.cleaned_data.get('alternate_phone_number'),
+                    fathers_name = form.cleaned_data.get('fathers_name'),
+                    fathers_contact = form.cleaned_data.get('fathers_contact'),
+                    mothers_name = form.cleaned_data.get('mothers_name'),
+                    mothers_contact = form.cleaned_data.get('mothers_contact'),
+
+                    program = form.cleaned_data.get('program'),
+                    semester = form.cleaned_data.get('semester'),
+                    course_start_year = form.cleaned_data.get('course_start_year'),
+                    course_duration = form.cleaned_data.get('course_duration'),
+
+                    permanent_address = form.cleaned_data.get('permanent_address'),
+                    current_address = form.cleaned_data.get('current_address'),
+                    state = form.cleaned_data.get('state'),
+
+                    category = form.cleaned_data.get('category'),
+                    disability = form.cleaned_data.get('disability'),
+                    cet_rank = form.cleaned_data.get('cet_rank'),
+                    special_quota = form.cleaned_data.get('special_quota'),
+                    family_income = form.cleaned_data.get('family_income'),
+                    previous_academic_stream = form.cleaned_data.get('previous_academic_stream'),
                 )
 
                 messages.success(request, "Student added successfully!")

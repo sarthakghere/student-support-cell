@@ -21,68 +21,83 @@
 {% endblock %}
 
 {% block content %}
-    <div class="container mt-5">
-        <h2 class="mb-4">Student Details</h2>
+<div class="container mt-5">
+    <h2 class="mb-4">Student Details</h2>
 
-        <!-- Student Details -->
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <strong>Personal Information</strong>
-                <div>
-                    <a href="{% url 'students:edit_student' student.id %}" class="btn btn-warning btn-sm">Edit</a>
-                    <a href="{% url 'students:delete_student' student.id %}" class="btn btn-danger btn-sm" 
-                       onclick="return confirm('Are you sure you want to delete this student?');">
-                        Delete
-                    </a>
-                </div>
-            </div>
-            <div class="card-body">
-                <p><strong>Name:</strong> {{ student.user.first_name }} {{ student.user.last_name }}</p>
-                <p><strong>PRN:</strong> {{ student.prn }}</p>
-                <p><strong>Date of Birth:</strong> {{ student.dob }}</p>
-                <p><strong>Gender:</strong> {{ student.get_gender_display }}</p>
-                <p><strong>Phone Number:</strong> {{ student.phone_number }}</p>
-                <p><strong>Email:</strong> {{ student.user.email }}</p>
+    <!-- Student Details -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <strong>Personal Information</strong>
+            <div>
+                <a href="{% url 'students:edit_student' student.id %}" class="btn btn-warning btn-sm">Edit</a>
+                <a href="{% url 'students:delete_student' student.id %}" class="btn btn-danger btn-sm" 
+                   onclick="return confirm('Are you sure you want to delete this student?');">
+                    Delete
+                </a>
             </div>
         </div>
-
-        <div class="card mb-4">
-            <div class="card-header">
-                <strong>Academic Information</strong>
-            </div>
-            <div class="card-body">
-                <p><strong>Program:</strong> {{ student.get_program_display }}</p>
-                <p><strong>Semester:</strong> {{ student.get_semester_display }}</p>
-                <p><strong>Course Start Year:</strong> {{ student.course_start_year }}</p>
-                <p><strong>Course Duration:</strong> {{ student.get_course_duration_display }} years</p>
-            </div>
-        </div>
-
-        <div class="card mb-4">
-            <div class="card-header">
-                <strong>Additional Details</strong>
-            </div>
-            <div class="card-body">
-                <p><strong>Caste:</strong> {{ student.get_caste_display }}</p>
-                <p><strong>Religion:</strong> {{ student.religion }}</p>
-                <p><strong>Nationality:</strong> {{ student.nationality }}</p>
-                <p><strong>PAN:</strong> {{ student.pan|default:"Not Provided" }}</p>
-                <p><strong>Aadhar:</strong> {{ student.aadhar|default:"Not Provided" }}</p>
-                <p><strong>ABC ID:</strong> {{ student.abc_id|default:"Not Provided" }}</p>
-            </div>
-        </div>
-
-        <div class="card mb-4">
-            <div class="card-header">
-                <strong>Address</strong>
-            </div>
-            <div class="card-body">
-                <p><strong>Street Address:</strong> {{ student.street_address }}</p>
-                <p><strong>City:</strong> {{ student.city }}</p>
-                <p><strong>State:</strong> {{ student.state }}</p>
-                <p><strong>Pincode:</strong> {{ student.pincode }}</p>
-                <p><strong>Country:</strong> {{ student.country }}</p>
-            </div>
+        <div class="card-body">
+            <p><strong>Name:</strong> {{ student.user.full_name }}</p>
+            <p><strong>PRN:</strong> {{ student.prn }}</p>
+            <p><strong>ERP ID:</strong> {{ student.erp }}</p>
+            <p><strong>Date of Birth:</strong> {{ student.dob }}</p>
+            <p><strong>Gender:</strong> {{ student.get_gender_display }}</p>
+            <p><strong>Phone Number:</strong> {{ student.phone_number }}</p>
+            <p><strong>Alternate Phone Number:</strong> {{ student.alternate_phone_number|default:"Not Provided" }}</p>
+            <p><strong>Email:</strong> {{ student.user.email }}</p>
         </div>
     </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <strong>Parental Information</strong>
+        </div>
+        <div class="card-body">
+            <p><strong>Father's Name:</strong> {{ student.fathers_name }}</p>
+            <p><strong>Father's Contact:</strong> {{ student.fathers_contact|default:"Not Provided" }}</p>
+            <p><strong>Mother's Name:</strong> {{ student.mothers_name }}</p>
+            <p><strong>Mother's Contact:</strong> {{ student.mothers_contact|default:"Not Provided" }}</p>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <strong>Academic Information</strong>
+        </div>
+        <div class="card-body">
+            <p><strong>Program:</strong> {{ student.get_program_display }}</p>
+            <p><strong>Semester:</strong> {{ student.get_semester_display }}</p>
+            <p><strong>Course Start Year:</strong> {{ student.course_start_year }}</p>
+            <p><strong>Course Duration:</strong> {{ student.get_course_duration_display }} years</p>
+            <p><strong>Previous Academic Stream:</strong> {{ student.previous_academic_stream|default:"Not Provided" }}</p>
+            <p><strong>CET Rank:</strong> {{ student.cet_rank|default:"Not Provided" }}</p>
+            <p><strong>Special Quota:</strong> {{ student.special_quota|default:"None" }}</p>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <strong>Additional Details</strong>
+        </div>
+        <div class="card-body">
+            <p><strong>Category:</strong> {{ student.get_category_display }}</p>
+            <p><strong>Disability:</strong> {{ student.disability|yesno:"Yes,No" }}</p>
+            <p><strong>ABC ID:</strong> {{ student.abc_id|default:"Not Provided" }}</p>
+            <p><strong>Family Income:</strong> {{ student.family_income|default:"Not Provided" }}</p>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <strong>Address</strong>
+        </div>
+        <div class="card-body">
+            <p><strong>Permanent Address:</strong> {{ student.permanent_address }}</p>
+            <p><strong>Current Address:</strong> {{ student.current_address }}</p>
+            <p><strong>State:</strong> {{ student.state }}</p>
+        </div>
+    </div>
+
+</div>
+
 {% endblock %}

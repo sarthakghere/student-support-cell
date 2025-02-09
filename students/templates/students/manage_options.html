@@ -22,7 +22,7 @@
                     <tr>
                         <th scope="col">#</th>
                         <th scope="col">Name</th>
-                        <th scope="col">Roll Number</th>
+                        <th scope="col">PRN</th>
                         <th scope="col">Class</th>
                         <th scope="col">Email</th>
                         <th scope="col">Actions</th>
@@ -32,7 +32,7 @@
                     {% for student in students %}
                         <tr>
                             <th scope="row">{{ forloop.counter }}</th>
-                            <td>{{ student.user.first_name }} {{ student.user.last_name }}</td>
+                            <td>{{ student.user.full_name }}</td>
                             <td><a href="{% url 'students:view_student' student.id %}">{{ student.prn }}</a></td>
                             <td>{{ student.program }}</td>
                             <td>{{ student.user.email }}</td>
