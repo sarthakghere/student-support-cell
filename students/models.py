@@ -36,7 +36,7 @@ class Student(models.Model):
         FEMALE = "F", "Female"
         OTHER = "O", "Other"
 
-    class CasteChoices(models.TextChoices):
+    class CategoryChoices(models.TextChoices):
         GEN = "GEN", "General"
         OBC = "OBC", "Other Backward Class"
         SC = "SC", "Scheduled Caste"
@@ -51,42 +51,37 @@ class Student(models.Model):
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student')
     prn = models.CharField(max_length=20, unique=True)
+    erp = models.CharField(max_length=20, unique=True)
     phone_number = models.CharField(max_length=15, validators=[phone_regex])
     dob = models.DateField()
     gender = models.CharField(max_length=5, default=None, null= True, choices=GenderChoices.choices)
+    alternate_phone_number = models.CharField(max_length=15, validators=[phone_regex], blank=True, null=True)
+    fathers_name = models.CharField(max_length=50)
+    fathers_contact = models.CharField(max_length=15, validators=[phone_regex])
+    mothers_name = models.CharField(max_length=50)
+    mothers_contact = models.CharField(max_length=15, validators=[phone_regex])
+
+    category = models.CharField(max_length=20, choices=CategoryChoices.choices, default=CategoryChoices.GEN)
+    disability = models.BooleanField(default=False)
+
+    # Need Additionally In Excel Sheet
     program = models.CharField(max_length=50, choices=ProgramChoices.choices)
     semester = models.CharField(max_length=10, choices=SemesterChoices.choices, default=SemesterChoices.SEM1)
     course_start_year = models.IntegerField(validators=[MinValueValidator(1900), MaxValueValidator(date.today().year)])
     course_duration = models.IntegerField(choices=CourseDurationChoices.choices)
-    caste = models.CharField(max_length=20, choices=CasteChoices.choices, default=CasteChoices.GEN)
-    religion = models.CharField(max_length=100)
-    nationality = models.CharField(max_length=100)
-    pan = models.CharField(
-        max_length=10, 
-        unique=True, 
-        null=True, 
-        blank=True,
-        validators=[RegexValidator(
-            regex=r'^[A-Z]{5}\d{4}[A-Z]{1}$',
-            message="PAN must follow the format: 5 letters, 4 digits, 1 letter (e.g., ABCDE1234F)."
-        )]
-    )
-    aadhar = models.CharField(
-        max_length=12, 
-        unique=True, 
-        null=True, 
-        blank=True,
-        validators=[RegexValidator(
-            regex=r'^\d{12}$',
-            message="Aadhar must be exactly 12 digits."
-        )]
-    )
+    
     abc_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
-    street_address = models.TextField()
-    city = models.CharField(max_length=50)
+
+    permament_address = models.TextField()
+    current_address = models.TextField()
     state = models.CharField(max_length=50)
-    pincode = models.CharField(max_length=6, validators=[pincode_regex])
-    country = models.CharField(max_length=50)
+
+    # Optional Fields
+    cet_rank = models.IntegerField(null=True, blank=True)
+    special_quota = models.CharField(max_length=50, null=True, blank=True)
+    family_income = models.FloatField(null=True, blank=True)
+    previous_academic_stream = models.CharField(max_length=50, null=True, blank=True)
+
 
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name}"
@@ -94,7 +89,7 @@ class Student(models.Model):
     class Meta:
         verbose_name = "Student"
         verbose_name_plural = "Students"
-        ordering = ['user__first_name', 'user__last_name']
+        ordering = ['user__full_name']
 
 
 class Certificate(models.Model):
