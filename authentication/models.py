@@ -37,7 +37,9 @@ class User(AbstractUser):
         STAFF = "staff", "Staff"
         STUDENT = "student", "Student"
 
-    middle_name = models.CharField(max_length=50, null=True, blank=True)
+    full_name = models.CharField(max_length=255)
+    first_name = None
+    last_name = None
     email = models.EmailField(unique=True)
     username = None
     role = models.CharField(
