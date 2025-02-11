@@ -36,14 +36,13 @@ def get_certificate_link(student):
     return f"/certificates/download-certificate/{certificate_id}/"
 
 
-def get_student_initial_data(student):
+def get_student_initial_data(student: Student):
     # Prepare initial data from student instance for the BonafideCertificateForm.
     return {
         "PRN": student.prn,
-        "first_name": student.user.first_name,
-        "last_name": student.user.last_name,
+        "full_name": student.user.full_name,
         "gender": student.gender,
-        "fathers_name": "",
+        "fathers_name": student.fathers_name,
         "course": student.program,
         "course_start": student.course_start_year,
         "course_end": student.course_start_year + student.course_duration,
@@ -119,7 +118,7 @@ def bonafide_certificate(request):
                         file_path=certificate_path,
                         issued_by=request.user,
                         approval_status=Certificate.StatusChoices.APPROVED,
-                        details=f"Bonafide Certificate for {student_data['first_name']} {student_data['last_name']} PRN: {student_data['PRN']}"
+                        details=f"Bonafide Certificate for {student_data['full_name']} PRN: {student_data['PRN']}"
                     )
                     download_link = f"<a href='/certificates/download-certificate/{certificate.id}/'>Click Here to download.</a>"
                     messages.success(request, mark_safe(f"Bonafide Certificate generated successfully. {download_link}"))

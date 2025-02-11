@@ -1,6 +1,12 @@
 from docxtpl import DocxTemplate
 import os
 from django.conf import settings
+import inflect
+import re
+
+def to_pascal_case(text):
+    words = re.split(r'[\s_-]+', text)  # Split by space, underscore, or hyphen
+    return ''.join(word.capitalize() for word in words)
 
 def generate_bonafide_certificate(student_data, backlogs: list):
     template_path = os.path.join(settings.MEDIA_ROOT, 'document_templates/Bonafide_Template.docx')
@@ -11,17 +17,18 @@ def generate_bonafide_certificate(student_data, backlogs: list):
 
     # Extract details from student_data
     prn = student_data.get("PRN")
-    first_name = student_data.get("first_name")
-    last_name = student_data.get("last_name")
+    full_name = student_data.get("full_name")
     gender = student_data.get("gender").lower()
     fathers_name = student_data.get("fathers_name")
     course = student_data.get("course").upper()
     course_start = int(student_data.get("course_start"))
     course_end = int(student_data.get("course_end"))
 
-    name = f"{first_name} {last_name}"
+    name = f"{full_name}"
     batch = f"{course_start} - {course_end}"
     years = course_end - course_start
+    p = inflect.engine()
+    years = to_pascal_case(p.number_to_words(years))
     salutation = "Mr." if gender == 'male' else "Ms."
     relation = "S/O" if gender == 'male' else "D/O"
     pronoun_him_her = "him" if gender == "male" else "her"

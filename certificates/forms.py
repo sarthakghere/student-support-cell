@@ -6,8 +6,7 @@ class FetchStudentForm(forms.Form):
 
 class BonafideCertificateForm(forms.Form):
     PRN = forms.CharField(label='PRN', max_length=100, required=True)
-    first_name = forms.CharField(label='First Name', max_length=100, required=True)
-    last_name = forms.CharField(label='Last Name', max_length=100, required=True)
+    full_name = forms.CharField(label='Full Name', max_length=100, required=True)
     gender = forms.ChoiceField(label='Gender', choices=Student.GenderChoices.choices, required=True)
     fathers_name = forms.CharField(label='Father\'s Name', max_length=100, required=True)
     course = forms.CharField(label='Course', max_length=100, required=True)
