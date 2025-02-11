@@ -11,6 +11,7 @@ openpyxl = "*"
 pandas = "*"
 django-crispy-forms = "*"
 crispy-bootstrap5 = "*"
+inflect = "*"
 
 [dev-packages]
 
