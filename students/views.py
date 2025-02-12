@@ -5,10 +5,11 @@ from django.core.files.storage import FileSystemStorage
 from django.conf import settings
 from .models import Student
 from authentication.models import User
-from .forms import StudentForm, EditStudentForm
+from .forms import StudentForm, EditStudentForm, ExcelInputForm
 from dotenv import load_dotenv
 import os
 import pandas as pd
+import openpyxl
 load_dotenv()
 
 # Create your views here.
@@ -108,7 +109,11 @@ def edit_student(request, pk):
 @login_required(login_url='authentication:login')
 def delete_student(request, pk):
     student = get_object_or_404(Student, id=pk)
+    email = student.user.email
     student.delete()
+    user = User.objects.get(email=email)
+    user.delete()
+    messages.success(request, "Student deleted successfully!")
     return redirect('students:manage_students')
 
 @login_required(login_url='authentication:login')
@@ -188,78 +193,139 @@ def add_single_student(request):
     return render(request, 'students/add_single_student.html', {'form': form})
 
 @login_required(login_url='authentication:login')
-def bulk_add_students(request):
-    table_html = None
-    file_name = None
+def upload_excel(request):
+    form = ExcelInputForm()
+    if request.method == "POST":
+        form = ExcelInputForm(request.POST, request.FILES)
+        if form.is_valid():
+            excel_file = form.files.get("excel_file")
+            fs = FileSystemStorage()
+            file_name = fs.save(excel_file.name, excel_file)
+            sheet_name = form.cleaned_data.get("sheet_name")
+            program = form.cleaned_data.get("program")
+            semester = form.cleaned_data.get("semester")
+            course_start_year = form.cleaned_data.get("course_start_year")
+            course_duration = form.cleaned_data.get('course_duration')
+            request.session['uploaded_excel_data'] = {
+                                                    'file_name': file_name,  
+                                                    'sheet_name': sheet_name,
+                                                    'program': program,
+                                                    'semester': semester,
+                                                    'course_start_year': course_start_year,
+                                                    'course_duration': course_duration
+                                                }
+            
+            file_path = fs.path(file_name)
 
-    if request.method == 'POST' and request.FILES.get('excel_file'):
-        excel_file = request.FILES['excel_file']
-        
-        # Save the file temporarily
-        fs = FileSystemStorage()
-        filename = fs.save(excel_file.name, excel_file)
-        file_path = fs.path(filename)  # Get the absolute path
-        
-        try:
-            # Read the Excel file
-            df = pd.read_excel(file_path)
-            table_html = df.to_html(classes="table table-striped table-bordered", index=False)
-            file_name = filename  # Pass file name to keep track
-        except Exception as e:
-            return render(request, 'students/bulk_add_upload.html', {
-                'error': f"Error processing the file: {e}"
-            })
+            try:
+                # Load the Excel file
+                wb = openpyxl.load_workbook(file_path, data_only=True)
 
-    return render(request, 'students/bulk_add_upload.html', {
-        'table_html': table_html,
-        'file_name': file_name
-    })
+                # Validate the sheet name
+                if sheet_name not in wb.sheetnames:
+                    form.add_error("sheet_name", "Invalid sheet name. Please check and try again.")
+                    fs.delete(file_path)
+                    return render(request, "students/upload_excel.html", {"form": form})
+            except Exception as e:
+                form.add_error("excel_file", f"Invalid File")
+                fs.delete(file_path)
+                return render(request, "students/upload_excel.html", {"form": form})
+            
+            else:
+                request.session["uploaded_excel_data"] = {
+                    "file_name": file_name,
+                    "sheet_name": sheet_name,
+                    "program": program,
+                    "semester": semester,
+                    "course_start_year": course_start_year,
+                    "course_duration": course_duration
+                }
+
+                messages.success(request, "Successful")
+                return redirect('students:preview_excel')
+
+
+    return render(request, "students/upload_excel.html", {'form': form})
+
 
 @login_required(login_url='authentication:login')
-def bulk_add_confirm(request, file_name):
+def preview_excel(request):
+            
+    # Read the Excel file
+    uploaded_data = request.session.get('uploaded_excel_data', {})
+    file_name = uploaded_data.get('file_name')
     file_path = os.path.join(settings.MEDIA_ROOT, file_name)
-    df = pd.read_excel(file_path)
+    sheet_name = uploaded_data.get('sheet_name')
+
+    df = pd.read_excel(file_path, skiprows=2, dtype=str, keep_default_na=False, sheet_name=sheet_name)
+    df = df.map(lambda x: x.strip() if isinstance(x, str) else x)  # Remove spaces
+    df = df.fillna("")  # Replace NaN with an empty string
+
+    table_html = df.to_html(classes="table table-striped table-bordered", index=False)
+
+    return render(request, 'students/preview_excel.html', {'table_html': table_html})
+
+@login_required(login_url='authentication:login')
+def confirm_add(request):
+    uploaded_data = request.session.get('uploaded_excel_data', {})
+    file_name = uploaded_data.get('file_name')
+    file_path = os.path.join(settings.MEDIA_ROOT, file_name)
+    sheet_name = uploaded_data.get('sheet_name')
+    program = uploaded_data.get('program')
+    semester = uploaded_data.get('semester')
+    course_start_year = uploaded_data.get('course_start_year')
+    course_duration = uploaded_data.get('course_duration')
 
     try:
-        for index, row in df.iterrows():
-            # Create or retrieve the User instance
-            user, created = User.objects.get_or_create(
-                email=row['email'],
-                defaults={
-                    'first_name': row['first_name'],
-                    'last_name': row['last_name'],
-                    'role': 'student',
-                    'password': os.getenv('DEFAULT_STUDENT_PASSWORD'),
-                }
-            )
+        df = pd.read_excel(file_path, sheet_name=sheet_name, skiprows=2)
+        df = df.astype(str).map(lambda x: x.strip() if pd.notna(x) else None)  # Convert all values to strings and strip spaces
 
-            # Create the Student instance and associate it with the User
-            student = Student.objects.create(
-                user=user,
-                prn=row['prn'],
-                phone_number=row['phone_number'],
-                dob=row['dob'],
-                gender=row['gender'],
-                program=row['program'],
-                semester=row['semester'],
-                course_start_year=row['course_start_year'],
-                course_duration=row['course_duration'],
-                caste=row['caste'],
-                religion=row['religion'],
-                nationality=row['nationality'],
-                pan=row['pan'],
-                aadhar=row['aadhar'],
-                abc_id=row['abc_id'],
-                street_address=row['street_address'],
-                city=row['city'],
-                state=row['state'],
-                pincode=row['pincode'],
-                country=row['country'],
+        for index, row in df.iterrows():
+            email = row['Email ID'].strip() if pd.notna(row['Email ID']) else None
+            full_name = row['Name of the Student'].strip() if pd.notna(row['Name of the Student']) else ""
+            # Check if the user exists or create a new one
+            user, created = User.objects.get_or_create(
+                email=email,
+                defaults={'full_name': full_name, 'role': 'student', 'password': os.getenv('DEFAULT_STUDENT_PASSWORD')}
             )
+            gender = Student.GenderChoices.MALE if row['Gender'].lower() == 'male' else Student.GenderChoices.FEMALE if row['Gender'].lower() == 'female' else Student.GenderChoices.OTHER
+
+            student_data = {
+                "user": user,  # Ensure user object is already created
+                "prn": row["PRN"],
+                "erp": row["ERP ID"],
+                "phone_number": row["Mobile No."],
+                "dob": row["DOB"],
+                "gender": gender,
+                "alternate_phone_number": row["Alternative Mobile No."],
+                "fathers_name": row["Father's Name"],
+                "fathers_contact": row["Father's Mobile No."],
+                "mothers_name": row["Mother's Name"],
+                "mothers_contact": row["Mother's Mobile No."],
+                "category": row["Category"],
+                "disability": False if row["Disability"] == "NO" else True,
+                "program": program,
+                "semester": semester,
+                "course_start_year": int(course_start_year),
+                "course_duration": course_duration,
+                "abc_id": row["ABC ID"],
+                "permanent_address": row["Permanent Address with PIN Code"],
+                "current_address": row["Correspondence Address with PIN Code"],
+                "state": row["State"],
+                "cet_rank": int(row["RANK"]),
+                "special_quota": row["Any Special Quota NRI/ JNK"],
+                "family_income": 0 if pd.isna(row["Family Annual Income"]) or row["Family Annual Income"] in ["", "nan", None] else float(row["Family Annual Income"]),
+                "previous_academic_stream": row["Previous Academic Streams (Arts/ Commerce/Science/ Humanities)"],
+            }
+
+            student = Student.objects.create(**student_data)
+            print(student_data)
+
+
     except Exception as e:
         messages.error(request, f"Error adding students: {e}")
-        return redirect('students:bulk_add_upload')
-    
+        return redirect('students:upload_excel')
+
     else:
         messages.success(request, "Students added successfully!")
-        return redirect('students:manage_students')  
+        return redirect('students:manage_students')

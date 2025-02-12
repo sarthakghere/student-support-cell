@@ -45,3 +45,11 @@ class EditStudentForm(StudentForm):
         self.fields['email'].widget.attrs['readonly'] = True
         self.fields['abc_id'].widget.attrs['readonly'] = True
         self.fields['cet_rank'].widget.attrs['readonly'] = True
+
+class ExcelInputForm(forms.Form):
+    excel_file = forms.FileField(required=True, label= "Upload Excel File")
+    sheet_name = forms.CharField(max_length=255, required=True)
+    program = forms.ChoiceField(choices=Student.ProgramChoices.choices, required=True)
+    semester = forms.ChoiceField(choices=Student.SemesterChoices.choices, required=True)
+    course_start_year = forms.IntegerField(required=True)
+    course_duration = forms.ChoiceField(choices=Student.CourseDurationChoices.choices, required=True)

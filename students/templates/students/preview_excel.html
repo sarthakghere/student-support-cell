@@ -4,17 +4,24 @@
 Preview Excel Data
 {% endblock %}
 
+{% block style %}
+
+{% endblock %}
+
+
 {% block content %}
-<div class="container mt-5">
+<div class="container mt-12">
     <h2 class="text-center">Preview Excel Data</h2>
     {% if table_html %}
-        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+        <h3 class="mt-4">Preview Uploaded Data</h3>
+        <div class="table-responsive">
             {{ table_html|safe }}
         </div>
-        <form method="POST" action="{% url 'students:save_students' %}">
+
+        <form method="post" action="{% url 'students:confirm_add' %}" class="mt-3">
             {% csrf_token %}
             <input type="hidden" name="file_name" value="{{ file_name }}">
-            <button type="submit" class="btn btn-success mt-3">Save Students</button>
+            <button type="submit" class="btn btn-success">Confirm & Add to Database</button>
         </form>
     {% endif %}
 </div>
