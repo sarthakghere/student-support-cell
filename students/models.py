@@ -132,7 +132,7 @@ class Certificate(models.Model):
     approved_on = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.get_certificate_type_display()} for {self.issued_to.user.first_name} {self.issued_to.user.last_name}"
+        return f"{self.get_certificate_type_display()} for {self.issued_to.user.full_name}"
 
     class Meta:
         ordering = ['-issue_date']
