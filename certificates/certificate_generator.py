@@ -16,9 +16,10 @@ def generate_bonafide_certificate(student_data, backlogs: list):
     template = DocxTemplate(template_path)
 
     # Extract details from student_data
+    print(student_data)
     prn = student_data.get("PRN")
     full_name = student_data.get("full_name")
-    gender = student_data.get("gender").lower()
+    gender = student_data.get("gender")
     fathers_name = student_data.get("fathers_name")
     course = student_data.get("course").upper()
     course_start = int(student_data.get("course_start"))
@@ -29,18 +30,20 @@ def generate_bonafide_certificate(student_data, backlogs: list):
     years = course_end - course_start
     p = inflect.engine()
     years = to_pascal_case(p.number_to_words(years))
-    salutation = "Mr." if gender == 'male' else "Ms."
-    relation = "S/O" if gender == 'male' else "D/O"
-    pronoun_him_her = "him" if gender == "male" else "her"
-    pronoun_his_her = "his" if gender == "male" else "her"
+    salutation = "Mr." if gender == 'M' else "Ms."
+    relation = "S/O" if gender == 'M' else "D/O"
+    pronoun_him_her = "him" if gender == "M" else "her"
+    pronoun_his_her = "his" if gender == "M" else "her"
 
     # Prepare backlog data
     backlog_details = []
-    for backlog in backlogs:
+
+    for x in range(len(backlogs)):
         backlog_details.append({
-            'subject': backlog.get('subject_name'),
-            'backlog_semester': f"Semester: {backlog.get('declared_fail')}",
-            'passing_semester': f"Semester: {backlog.get('declared_pass')}",
+            'no': f"{x + 1}",
+            'subject': backlogs[x].get('subject_name'),
+            'backlog_semester': f"{backlogs[x].get('declared_fail')}",
+            'passing_semester': f"{backlogs[x].get('declared_pass')}",
         })
         semester_description = f"6th" if years == 3 else f"8th" if years == 4 else ""
     else:
