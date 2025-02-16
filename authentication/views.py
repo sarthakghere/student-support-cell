@@ -31,6 +31,7 @@ def user_login(request):
 @login_required(login_url='authentication:login')
 def logout_view(request):
     logout(request)
+    request.session.flush()
     return redirect('authentication:login')
 
 @login_required(login_url='authentication:login')

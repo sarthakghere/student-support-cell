@@ -154,3 +154,6 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'authentication.User'
 CRISPY_TEMPLATE_PACK = 'bootstrap5' 
+
+SESSION_COOKIE_AGE = 3600  # Session expires in 1 hour
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Ensures session is cleared on browser close
