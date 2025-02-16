@@ -37,7 +37,7 @@
                         <th scope="row">{{ forloop.counter }}</th>
                         <td>{{ certificate.get_certificate_type_display }}</td>
                         <td><a href="{% url 'students:view_student' certificate.issued_to.id %}">{{ certificate.issued_to.prn }}</a></td>
-                        <td>{{ certificate.issued_by.email }}</td>
+                        <td>{{ certificate.issued_by.full_name }}</td>
                         <td>{{ certificate.issue_date }}</td>
                         <td>
                             {% if certificate.approval_status == 'approved' %}
