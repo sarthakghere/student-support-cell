@@ -14,6 +14,7 @@ Preview Excel Data
     <h2 class="text-center">Preview Excel Data</h2>
     {% if table_html %}
         <h3 class="mt-4">Preview Uploaded Data</h3>
+        <p><strong>Total Students: {{total_rows}}</strong></p>
         <div class="table-responsive">
             {{ table_html|safe }}
         </div>
