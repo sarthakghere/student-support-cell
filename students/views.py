@@ -144,7 +144,6 @@ def add_single_student(request):
                     defaults={
                         'full_name': full_name,
                         'role': 'student',
-                        'password': os.getenv('DEFAULT_STUDENT_PASSWORD'),
                     }
                 )
 
@@ -260,10 +259,11 @@ def preview_excel(request):
     df = pd.read_excel(file_path, skiprows=2, dtype=str, keep_default_na=False, sheet_name=sheet_name)
     df = df.map(lambda x: x.strip() if isinstance(x, str) else x)  # Remove spaces
     df = df.fillna("")  # Replace NaN with an empty string
+    total_rows = df.shape[0]
 
     table_html = df.to_html(classes="table table-striped table-bordered", index=False)
 
-    return render(request, 'students/preview_excel.html', {'table_html': table_html})
+    return render(request, 'students/preview_excel.html', {'table_html': table_html, 'total_rows': total_rows})
 
 @login_required(login_url='authentication:login')
 def confirm_add(request):
@@ -275,7 +275,7 @@ def confirm_add(request):
     semester = uploaded_data.get('semester')
     course_start_year = uploaded_data.get('course_start_year')
     course_duration = uploaded_data.get('course_duration')
-
+    count = 0
     try:
         df = pd.read_excel(file_path, sheet_name=sheet_name, skiprows=2)
         df = df.astype(str).map(lambda x: x.strip() if pd.notna(x) else None)  # Convert all values to strings and strip spaces
@@ -285,9 +285,15 @@ def confirm_add(request):
             full_name = row['Name of the Student'].strip() if pd.notna(row['Name of the Student']) else ""
             # Check if the user exists or create a new one
             user, created = User.objects.get_or_create(
-                email=email,
-                defaults={'full_name': full_name, 'role': 'student', 'password': os.getenv('DEFAULT_STUDENT_PASSWORD')}
-            )
+                    email=email,
+                    defaults={
+                        'full_name': full_name,
+                        'role': 'student',
+                    }
+                )
+            if created:
+                user.save()
+
             gender = Student.GenderChoices.MALE if row['Gender'].lower() == 'male' else Student.GenderChoices.FEMALE if row['Gender'].lower() == 'female' else Student.GenderChoices.OTHER
 
             student_data = {
@@ -319,7 +325,7 @@ def confirm_add(request):
             }
 
             student = Student.objects.create(**student_data)
-            print(student_data)
+            count += 1
 
 
     except Exception as e:
@@ -327,5 +333,5 @@ def confirm_add(request):
         return redirect('students:upload_excel')
 
     else:
-        messages.success(request, "Students added successfully!")
+        messages.success(request, "Students added, Count: " + str(count) + "")
         return redirect('students:manage_students')
