@@ -67,7 +67,9 @@ def add_staff(request):
         form = StaffForm(request.POST)
         if form.is_valid():
             email = form.cleaned_data.get('email')
-            full_name = form.cleaned_data.get('full_name')
+            first_name = form.cleaned_data.get('first_name')
+            middle_name = form.cleaned_data.get('middle_name')
+            last_name = form.cleaned_data.get('last_name')
             password = form.cleaned_data.get('password')
             confirm_password = form.cleaned_data.get('confirm_password')
 
@@ -81,7 +83,9 @@ def add_staff(request):
                 # Create staff user
                 user = User.objects.create_user(
                     email=email,
-                    full_name=full_name,
+                    first_name = first_name,
+                    middle_name = middle_name if middle_name else None,
+                    last_name = last_name,
                     password=password,
                     role='staff'
                 )
@@ -102,7 +106,9 @@ def delete_staff(request, pk):
 def edit_staff(request, pk):
     staff = get_object_or_404(User, id=pk, role='staff')
     data = {
-        'full_name': staff.full_name,
+        'first_name': staff.first_name,
+        'middle_name': staff.middle_name,
+        'last_name': staff.last_name,
         'email': staff.email,
     }
     form = StaffEditForm(initial=data)
@@ -112,14 +118,18 @@ def edit_staff(request, pk):
         # Update Staff User Details
         if form.is_valid():
 
-            full_name = form.cleaned_data.get('full_name')
+            first_name = form.cleaned_data.get('first_name')
+            middle_name = form.cleaned_data.get('middle_name')
+            last_name = form.cleaned_data.get('last_name')
             email = form.cleaned_data.get('email')
 
             if User.objects.filter(email=email).exclude(id=staff.id).exists():
                 form.add_error('email', "This email is already in use.")
                 return render(request, 'authentication/staff/edit_staff.html', {'staff': staff, 'form': form})
             
-            staff.full_name = full_name
+            staff.first_name = first_name
+            staff.middle_name = middle_name
+            staff.last_name = last_name
             staff.email = email
             staff.save()
             messages.success(request, "Staff information updated successfully!")
