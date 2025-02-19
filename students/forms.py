@@ -8,7 +8,9 @@ class StudentForm(forms.Form):
     erp = forms.CharField(max_length=20,required=True,label="ERP ID")
     email = forms.EmailField(required=True,label="Email Address")
     abc_id = forms.CharField(max_length=20,label="ABC ID",required=False)
-    full_name = forms.CharField(max_length=100,required=True,label="Full Name")
+    first_name = forms.CharField(max_length=50,required=True,label="First Name")
+    middle_name = forms.CharField(max_length=50,required=False,label="Middle Name")
+    last_name = forms.CharField(max_length=50,required=True,label="Last Name")
     dob = forms.DateField(required=True, label="Date of Birth", widget=forms.SelectDateWidget(years=range(date.today().year, 1970, -1)))
     gender = forms.ChoiceField(choices=Student.GenderChoices.choices,required=False,label="Gender")
     

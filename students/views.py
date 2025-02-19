@@ -127,7 +127,9 @@ def add_single_student(request):
         if form.is_valid():
             email = form.cleaned_data.get('email')
             prn = form.cleaned_data.get('prn')
-            full_name = form.cleaned_data.get('full_name')
+            first_name = form.cleaned_data.get('first_name')
+            middle_name = form.cleaned_data.get('middle_name')
+            last_name = form.cleaned_data.get('last_name')
 
             # Check if the email already exists
             if User.objects.filter(email=email).exists():
@@ -142,7 +144,9 @@ def add_single_student(request):
                 user, created = User.objects.get_or_create(
                     email=email,
                     defaults={
-                        'full_name': full_name,
+                        'first_name': first_name,
+                        'middle_name': middle_name,
+                        'last_name': last_name,
                         'role': 'student',
                     }
                 )
@@ -283,11 +287,16 @@ def confirm_add(request):
         for index, row in df.iterrows():
             email = row['Email ID'].strip() if pd.notna(row['Email ID']) else None
             full_name = row['Name of the Student'].strip() if pd.notna(row['Name of the Student']) else ""
+            first_name = full_name.split()[0]
+            middle_name = " ".join(full_name.split()[1:-1]) if len(full_name.split()) > 2 else ""
+            last_name = full_name.split()[-1] if len(full_name.split()) > 1 else ""
             # Check if the user exists or create a new one
             user, created = User.objects.get_or_create(
                     email=email,
                     defaults={
-                        'full_name': full_name,
+                        'first_name': first_name,
+                        'middle_name': middle_name,
+                        'last_name': last_name,
                         'role': 'student',
                     }
                 )

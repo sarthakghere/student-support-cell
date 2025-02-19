@@ -37,7 +37,7 @@
             </div>
         </div>
         <div class="card-body">
-            <p><strong>Name:</strong> {{ student.user.full_name }}</p>
+            <p><strong>Name:</strong> {{ student.user.first_name }} {{student.user.middle_name|default:""}} {{ student.user.last_name }}</p>
             <p><strong>PRN:</strong> {{ student.prn }}</p>
             <p><strong>ERP ID:</strong> {{ student.erp }}</p>
             <p><strong>Date of Birth:</strong> {{ student.dob }}</p>
