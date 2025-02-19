@@ -38,9 +38,13 @@ def get_certificate_link(student):
 
 def get_student_initial_data(student: Student):
     # Prepare initial data from student instance for the BonafideCertificateForm.
+    if student.user.middle_name:
+        full_name = student.user.first_name + " " + student.user.middle_name + " " + student.user.last_name
+    else:
+        full_name = student.user.first_name + " " + student.user.last_name
     return {
         "PRN": student.prn,
-        "full_name": student.user.full_name,
+        "full_name": full_name,
         "gender": student.gender,
         "fathers_name": student.fathers_name,
         "course": student.program,
