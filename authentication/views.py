@@ -10,22 +10,22 @@ def is_admin(user):
     return user.is_authenticated and user.role == 'admin'
 
 def user_login(request):
+    form = LoginForm()
     if request.method == 'POST':
-        email = request.POST.get('email')
-        password = request.POST.get('password')
-        user = authenticate(request, email=email, password=password)
-        if user is not None:
-            login(request, user)
-            if user.role == 'admin':
-                return redirect('authentication:admin_dashboard')
-            elif user.role == 'staff':
-                return redirect('certificates:certificates_home')
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data.get('email')
+            password = form.cleaned_data.get('password')
+            user = authenticate(request, email=email, password=password)
+            if user is not None and user.role in (User.RoleChoices.ADMIN, User.RoleChoices.STAFF):
+                login(request, user)
+                if user.role == User.RoleChoices.ADMIN:
+                    return redirect('authentication:admin_dashboard')
+                elif user.role == User.RoleChoices.STAFF:
+                    return redirect('certificates:certificates_home')
             else:
-                messages.error(request, "Unauthorized access.")
-                return redirect('authentication:login')
-        else:
-            messages.error(request, "Invalid email or password.")
-    return render(request, 'authentication/login.html', {'form': LoginForm()})
+                form.add_error('email', "Invalid email or password")
+    return render(request, 'authentication/login.html', {'form': form})
 
 @login_required(login_url='authentication:login')
 def logout_view(request):
