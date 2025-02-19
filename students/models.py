@@ -87,12 +87,12 @@ class Student(models.Model):
 
 
     def __str__(self):
-        return f"{self.prn} - {self.user.full_name}"
+        return f"{self.prn} - {self.user.first_name} {self.user.last_name}"
     
     class Meta:
         verbose_name = "Student"
         verbose_name_plural = "Students"
-        ordering = ['user__full_name']
+        ordering = ['user__first_name', 'user__last_name']
 
 
 class Certificate(models.Model):
@@ -132,7 +132,7 @@ class Certificate(models.Model):
     approved_on = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.get_certificate_type_display()} for {self.issued_to.user.full_name}"
+        return f"{self.get_certificate_type_display()} for {self.issued_to.user.first_name} {self.issued_to.user.last_name}"
 
     class Meta:
         ordering = ['-issue_date']
