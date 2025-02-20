@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -52,6 +53,11 @@
     .container {
         padding-bottom: 80px; /* Adjust this based on footer height */
     }
+    .profile-icon {
+    width: 70px;  /* Adjust size as needed */
+    height: 30px;
+    object-fit: cover;
+}
 
 
         {% block style %}{% endblock %}
@@ -96,6 +102,14 @@
                         <a class="nav-link" href="{% url 'authentication:credits' %}">Credits</a>
                     </li>
                 {% endif %}
+            </ul>
+
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <img src="{% static 'images/college_logo.png' %}" alt="Profile Icon" class="profile-icon">
+                    </a>
+                </li>
             </ul>
         </div>
     </nav>
