@@ -3,6 +3,7 @@ import os
 from django.conf import settings
 import inflect
 import re
+from students.models import Student
 
 def to_pascal_case(text):
     words = re.split(r'[\s_-]+', text)  # Split by space, underscore, or hyphen
@@ -16,7 +17,6 @@ def generate_bonafide_certificate(student_data, backlogs: list):
     template = DocxTemplate(template_path)
 
     # Extract details from student_data
-    print(student_data)
     prn = student_data.get("PRN")
     full_name = student_data.get("full_name")
     gender = student_data.get("gender")
@@ -30,10 +30,10 @@ def generate_bonafide_certificate(student_data, backlogs: list):
     years = course_end - course_start
     p = inflect.engine()
     years = to_pascal_case(p.number_to_words(years))
-    salutation = "Mr." if gender == 'M' else "Ms."
-    relation = "S/O" if gender == 'M' else "D/O"
-    pronoun_him_her = "him" if gender == "M" else "her"
-    pronoun_his_her = "his" if gender == "M" else "her"
+    salutation = "Mr." if gender == Student.GenderChoices.MALE else "Ms."
+    relation = "S/O" if gender == Student.GenderChoices.MALE else "D/O"
+    pronoun_him_her = "him" if gender == Student.GenderChoices.MALE else "her"
+    pronoun_his_her = "his" if gender == Student.GenderChoices.MALE else "her"
 
     # Prepare backlog data
     backlog_details = []
