@@ -3,13 +3,16 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
-from .models import Student
+from django.contrib.auth import get_user_model
+from django.db import transaction
 from authentication.models import User
+from .models import Student
 from .forms import StudentForm, EditStudentForm, ExcelInputForm
 from dotenv import load_dotenv
 import os
 import pandas as pd
 import openpyxl
+
 load_dotenv()
 
 # Create your views here.
@@ -269,6 +272,8 @@ def preview_excel(request):
 
     return render(request, 'students/preview_excel.html', {'table_html': table_html, 'total_rows': total_rows})
 
+User = get_user_model()
+
 @login_required(login_url='authentication:login')
 def confirm_add(request):
     uploaded_data = request.session.get('uploaded_excel_data', {})
@@ -280,67 +285,97 @@ def confirm_add(request):
     course_start_year = uploaded_data.get('course_start_year')
     course_duration = uploaded_data.get('course_duration')
     count = 0
+    
     try:
         df = pd.read_excel(file_path, sheet_name=sheet_name, skiprows=2)
-        df = df.astype(str).map(lambda x: x.strip() if pd.notna(x) else None)  # Convert all values to strings and strip spaces
+        df = df.astype(str).map(lambda x: x.strip() if pd.notna(x) else None)
 
-        for index, row in df.iterrows():
+        # Extract all emails first
+        emails = df['Email ID'].dropna().unique().tolist()
+        
+        # Fetch existing users
+        existing_users = {user.email: user for user in User.objects.filter(email__in=emails)}
+
+        new_users = []
+        students = []
+
+        for _, row in df.iterrows():
             email = row['Email ID'].strip() if pd.notna(row['Email ID']) else None
             full_name = row['Name of the Student'].strip() if pd.notna(row['Name of the Student']) else ""
             first_name = full_name.split()[0]
             middle_name = " ".join(full_name.split()[1:-1]) if len(full_name.split()) > 2 else ""
             last_name = full_name.split()[-1] if len(full_name.split()) > 1 else ""
-            # Check if the user exists or create a new one
-            user, created = User.objects.get_or_create(
+
+            if email in existing_users:
+                user = existing_users[email]
+            else:
+                user = User(
                     email=email,
-                    defaults={
-                        'first_name': first_name,
-                        'middle_name': middle_name,
-                        'last_name': last_name,
-                        'role': 'student',
-                    }
+                    first_name=first_name,
+                    middle_name=middle_name,
+                    last_name=last_name,
+                    role='student',
                 )
-            if created:
-                user.save()
+                new_users.append(user)
 
-            gender = Student.GenderChoices.MALE if row['Gender'].lower() == 'male' else Student.GenderChoices.FEMALE if row['Gender'].lower() == 'female' else Student.GenderChoices.OTHER
+        # Bulk create new users
+        if new_users:
+            User.objects.bulk_create(new_users)
+            # Refresh existing_users dictionary to include new users
+            existing_users.update({user.email: user for user in User.objects.filter(email__in=emails)})
 
-            student_data = {
-                "user": user,  # Ensure user object is already created
-                "prn": row["PRN"],
-                "erp": row["ERP ID"],
-                "phone_number": row["Mobile No."],
-                "dob": row["DOB"],
-                "gender": gender,
-                "alternate_phone_number": row["Alternative Mobile No."],
-                "fathers_name": row["Father's Name"],
-                "fathers_contact": row["Father's Mobile No."],
-                "mothers_name": row["Mother's Name"],
-                "mothers_contact": row["Mother's Mobile No."],
-                "category": row["Category"],
-                "disability": False if row["Disability"] == "NO" else True,
-                "program": program,
-                "semester": semester,
-                "course_start_year": int(course_start_year),
-                "course_duration": course_duration,
-                "abc_id": row["ABC ID"],
-                "permanent_address": row["Permanent Address with PIN Code"],
-                "current_address": row["Correspondence Address with PIN Code"],
-                "state": row["State"],
-                "cet_rank": int(row["RANK"]),
-                "special_quota": row["Any Special Quota NRI/ JNK"],
-                "family_income": 0 if pd.isna(row["Family Annual Income"]) or row["Family Annual Income"] in ["", "nan", None] else float(row["Family Annual Income"]),
-                "previous_academic_stream": row["Previous Academic Streams (Arts/ Commerce/Science/ Humanities)"],
-            }
+        # Create students in bulk
+        for _, row in df.iterrows():
+            email = row['Email ID'].strip() if pd.notna(row['Email ID']) else None
+            user = existing_users.get(email)
+            if not user:
+                continue  # Skip if user creation failed
 
-            student = Student.objects.create(**student_data)
-            count += 1
+            gender = (
+                Student.GenderChoices.MALE if row['Gender'].lower() == 'male' else
+                Student.GenderChoices.FEMALE if row['Gender'].lower() == 'female' else
+                Student.GenderChoices.OTHER
+            )
 
+            student = Student(
+                user=user,
+                prn=row["PRN"],
+                erp=row["ERP ID"],
+                phone_number=row["Mobile No."],
+                dob=row["DOB"],
+                gender=gender,
+                alternate_phone_number=row["Alternative Mobile No."],
+                fathers_name=row["Father's Name"] if row['Father\'s Name'].lower()[:3] != 'mr.' else row['Father\'s Name'][3:],
+                fathers_contact=row["Father's Mobile No."],
+                mothers_name=row["Mother's Name"] if row['Mother\'s Name'][:3].lower() != 'mrs' else row['Mother\'s Name'][4:],
+                mothers_contact=row["Mother's Mobile No."],
+                category=row["Category"],
+                disability=False if row["Disability"] == "NO" else True,
+                program=program,
+                semester=semester,
+                course_start_year=int(course_start_year),
+                course_duration=course_duration,
+                abc_id=row["ABC ID"],
+                permanent_address=row["Permanent Address with PIN Code"],
+                current_address=row["Correspondence Address with PIN Code"],
+                state=row["State"],
+                cet_rank=int(row["RANK"]),
+                special_quota=row["Any Special Quota NRI/ JNK"],
+                family_income=0 if pd.isna(row["Family Annual Income"]) or row["Family Annual Income"] in ["", "nan", None] else float(row["Family Annual Income"]),
+                previous_academic_stream=row["Previous Academic Streams (Arts/ Commerce/Science/ Humanities)"],
+            )
+            students.append(student)
+
+        # Bulk create students
+        with transaction.atomic():
+            Student.objects.bulk_create(students)
+
+        count = len(students)
 
     except Exception as e:
         messages.error(request, f"Error adding students: {e}")
         return redirect('students:upload_excel')
 
     else:
-        messages.success(request, "Students added, Count: " + str(count) + "")
+        messages.success(request, f"Students added, Count: {count}")
         return redirect('students:manage_students')
