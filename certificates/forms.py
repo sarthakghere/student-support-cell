@@ -12,6 +12,16 @@ class BonafideCertificateForm(forms.Form):
     course = forms.CharField(label='Course', max_length=100, required=True)
     course_start = forms.IntegerField(label='Course Start', required=True)
     course_end = forms.IntegerField(label='Course End', required=True)
+    def __init__(self, *args, **kwargs):
+        super(BonafideCertificateForm, self).__init__(*args, **kwargs)
+        self.fields['PRN'].widget.attrs['readonly'] = True
+        self.fields['full_name'].widget.attrs['readonly'] = True
+        self.fields['gender'].widget.attrs['readonly'] = True
+        self.fields['fathers_name'].widget.attrs['readonly'] = True
+        self.fields['course'].widget.attrs['readonly'] = True
+        self.fields['course_start'].widget.attrs['readonly'] = True
+        self.fields['course_end'].widget.attrs['readonly'] = True
+
 
 class BacklogForm(forms.Form):
     subject_name = forms.CharField(max_length=255, label="Subject Name")
