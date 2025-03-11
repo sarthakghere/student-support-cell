@@ -32,7 +32,9 @@ def edit_student(request, pk):
     data = {
         'prn': student.prn,
         'erp': student.erp,
-        'full_name': student.user.full_name,
+        'first_name': student.user.first_name,
+        'middle_name': student.user.middle_name,
+        'last_name': student.user.last_name,
         'phone_number': student.phone_number,
         'email': student.user.email,
         'abc_id': student.abc_id,
@@ -72,8 +74,12 @@ def edit_student(request, pk):
             return render(request, 'students/edit_student.html', {'student': student, 'form': form})
         
         # Update Student User Details
-        full_name = form.cleaned_data.get('full_name')
-        student.user.first_name = full_name
+        first_name = form.cleaned_data.get('first_name')
+        middle_name = form.cleaned_data.get('middle_name')
+        last_name = form.cleaned_data.get('last_name')
+        student.user.first_name = first_name
+        student.user.middle_name = middle_name
+        student.user.last_name = last_name
         student.user.save()
 
         # Update Student Details
