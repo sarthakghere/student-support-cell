@@ -22,7 +22,7 @@ def user_login(request):
                 if user.role == User.RoleChoices.ADMIN:
                     return redirect('authentication:admin_dashboard')
                 elif user.role == User.RoleChoices.STAFF:
-                    return redirect('certificates:certificates_home')
+                    return redirect('authentication:staff_dashboard')
             else:
                 form.add_error('email', "Invalid email or password")
     return render(request, 'authentication/login.html', {'form': form})
@@ -44,7 +44,7 @@ def admin_dashboard(request):
 def staff_dashboard(request):
     if not request.user.is_authenticated:
         return redirect(request, 'authentication:login')   
-    return render(request, 'authentication/staff_dashboard.html')
+    return render(request, 'authentication/staff/staff_dashboard.html')
 
 @login_required(login_url='authentication:login')
 @user_passes_test(is_admin, login_url='authentication:login')

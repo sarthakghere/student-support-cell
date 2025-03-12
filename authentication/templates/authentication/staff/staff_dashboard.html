@@ -1,0 +1,31 @@
+{% extends 'authentication/base.html' %}
+
+{% block title %}
+    Admin Dashboard
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Generate Certificates</h5>
+                        <p class="card-text">Create and issue student certificates like TCs and bonafide certificates.</p>
+                        <a href="{% url 'certificates:certificates_home' %}" class="btn btn-primary">Go to Certificate Generation</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Student Applications</h5>
+                        <p class="card-text">View Student Applications</p>
+                        <a href="{% url 'applications:list_applications' %}" class="btn btn-primary">View Applications</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
