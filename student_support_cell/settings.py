@@ -49,6 +49,9 @@ INSTALLED_APPS = [
     'authentication',
     'students',
     'certificates',
+    'django_celery_beat',
+    'celery',
+    'applications',
 ]
 
 
@@ -130,6 +133,7 @@ USE_I18N = True
 USE_TZ = True
 
 
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
@@ -157,3 +161,10 @@ CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
 SESSION_COOKIE_AGE = 3600  # Session expires in 1 hour
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Ensures session is cleared on browser close
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'  # Redis as broker
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'  # Optional, for task results
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'  # Adjust to your timezone if needed

@@ -8,12 +8,22 @@ django = "*"
 pymysql = "*"
 python-dotenv = "*"
 openpyxl = "*"
-pandas = "*"
 django-crispy-forms = "*"
 crispy-bootstrap5 = "*"
 inflect = "*"
+pandas = "*"
+celery = "*"
+django-celery-beat = "*"
+redis = "*"
+google-auth = "*"
+google-auth-oauthlib = "*"
+google-auth-httplib2 = "*"
+google-api-python-client = "*"
+gspread = "*"
 
 [dev-packages]
+pyflakes = "*"
+deptry = "*"
 
 [requires]
 python_version = "3.13"
