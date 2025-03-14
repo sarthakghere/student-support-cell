@@ -20,10 +20,7 @@ def fetch_google_forms_data():
     sheet = client.open_by_key(SPREADSHEET_ID).worksheet(SHEET_NAME)
 
     data = sheet.get_all_records()
-    if len(data) <= 1:  # Only headers (1 row) or empty sheet (0 rows)
-        print("No new data to fetch - only headers or empty sheet.")
-        return "No new data to fetch."
-
+    
     for entry in data:
         prn = entry.get('PRN')
         student = Student.objects.filter(prn=prn).exists()

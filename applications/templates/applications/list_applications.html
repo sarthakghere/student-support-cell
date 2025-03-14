@@ -28,7 +28,7 @@
                             <th scope="row">{{ forloop.counter }}</th>
                             {% if application.student %}
                                 <td>{{ application.student.user.first_name }} {{ application.student.user.last_name }}</td>
-                                <td><a href="{% url 'students:view_student' student.id %}">{{ student.prn }}</a></td>
+                                <td><a href="{% url 'students:view_student' application.student.id %}">{{ application.student.prn }}</a></td>
                             {% else %}
                                 <td>{{ application.first_name }} {{ application.last_name }}</td>
                                 <td>{{application.prn}}</td>
@@ -36,10 +36,10 @@
                             <td>{{ application.subject|truncatechars:23 }}</td>
                             <td>
                                 <!-- View Button -->
-                                <a href="#" class="btn btn-info btn-sm">View</a>
+                                <a href="{% url 'applications:view_application' application.id %}" class="btn btn-info btn-sm">View</a>
                                 
                                 <!-- Print Button -->
-                                <a href="#" class="btn btn-warning btn-sm">Print</a>
+                                <a href="{% url 'applications:print_application' application.id %}" class="btn btn-warning btn-sm">Print</a>
                             </td>
                         </tr>
                     {% empty %}
