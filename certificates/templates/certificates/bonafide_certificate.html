@@ -4,61 +4,133 @@
 
 {% block style %}
 <style>
-        /* Full-page flexbox layout */
-        html, body {
-            height: 100%;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-        }
+    html, body {
+        height: 100%;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+    }
 
-        /* Makes content take available space and pushes the footer down */
-        .content-wrapper {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center; /* Centers the form */
-            align-items: center;
-            padding-bottom: 20px;
-        }
+    .content-wrapper {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding-bottom: 20px;
+    }
 
-        .container {
-            max-width: 600px;
-            width: 100%;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            background-color: white;
-        }
+    .container {
+        max-width: 600px;
+        width: 100%;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: white;
+    }
 
-        /* Footer styling */
-        footer {
-            background: #f8f9fa;
-            padding: 10px;
-            text-align: center;
-        }
+    footer {
+        background: #f8f9fa;
+        padding: 10px;
+        text-align: center;
+    }
 
-        .btn-primary{
-            margin: 5px;
-        }
+    .btn-primary {
+        margin: 5px;
+    }
 
-        .remove-backlog {
-            margin-top: 5px;
-        }
+    .remove-backlog {
+        margin-top: 5px;
+    }
 
+    .search-results {
+        margin-top: 20px;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .search-results ul {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    .search-results li {
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .search-results li:hover {
+        background-color: #f5f5f5;
+        cursor: pointer;
+    }
+
+    .messages {
+        margin-top: 15px;
+    }
+
+    .alert {
+        padding: 10px;
+        border-radius: 5px;
+    }
+
+    .alert-error {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .alert-warning {
+        background-color: #fff3cd;
+        color: #856404;
+    }
 </style>
 {% endblock %}
-
 
 {% block content %}
 <div class="content-wrapper">
     <div class="container">
         <h1 class="text-center">Generate Bonafide Certificate</h1>
-        <form method="post" class="mt-4">
+
+        <!-- Single Input Form -->
+        <form method="post" class="mt-4" id="search-fetch-form">
             {% csrf_token %}
-            {{ fetch_student_form|crispy }}
-            <button type="submit" name="fetch_details" class="btn btn-primary w-100">Fetch Student</button>
+            <div class="form-group">
+                <label for="query">Enter PRN or Name:</label>
+                <input type="text" name="query" id="query" class="form-control" placeholder="Enter PRN or Name">
+            </div>
+            <button type="submit" name="search_or_fetch" class="btn btn-primary w-100">Search/Fetch</button>
         </form>
+
+        <!-- Display Messages -->
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert {% if message.tags == 'error' %}alert-error{% elif message.tags == 'success' %}alert-success{% else %}alert-warning{% endif %}">
+                {{ message|safe }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Display Search Results -->
+        {% if search_results %}
+        <div class="search-results">
+            <h3>Search Results</h3>
+            <ul>
+                {% for student in search_results %}
+                <li onclick="selectStudent('{{ student.prn }}')">
+                    {{ student.user.first_name }} {{ student.user.last_name }} (PRN: {{ student.prn }})
+                </li>
+                {% empty %}
+                <li>No students found.</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
     </div>
 </div>
 
@@ -74,23 +146,17 @@
             <div>
                 <input type="radio" id="backlog-yes" name="has_backlogs" value="yes">
                 <label for="backlog-yes">Yes</label>
-
                 <input type="radio" id="backlog-no" name="has_backlogs" value="no" checked>
                 <label for="backlog-no">No</label>
-
             </div>
 
             <!-- Backlog Section -->
             <div id="backlog-section" style="display: none; margin-top: 15px;">
                 <h3>Backlog Details</h3>
-
                 <div id="backlog-forms">
                     <!-- Existing Backlogs will be added here -->
                 </div>
-
                 <button type="button" id="add-backlog" class="btn btn-primary w-50">Add Backlog</button>
-
-                <!-- Hidden Input to Store Backlog Data -->
                 <input type="hidden" name="backlog_data" id="backlog-data">
             </div>
 
@@ -98,9 +164,8 @@
         </form>
 
         {% if certificate %}
-        <a href="{%  url 'certificates:download_certificate' certificate.id %}" download class="btn btn-primary w-50">Download Certificate</a>
+        <a href="{% url 'certificates:download_certificate' certificate.id %}" download class="btn btn-primary w-50">Download Certificate</a>
         {% endif %}
-
     </div>
 </div>
 
@@ -112,51 +177,41 @@
         const addBacklogButton = document.getElementById("add-backlog");
         const backlogFormsContainer = document.getElementById("backlog-forms");
         const backlogDataInput = document.getElementById("backlog-data");
-    
+
         function toggleBacklogSection() {
             backlogSection.style.display = backlogYes.checked ? "block" : "none";
         }
-    
+
         backlogYes.addEventListener("change", toggleBacklogSection);
         backlogNo.addEventListener("change", toggleBacklogSection);
-        
-        toggleBacklogSection(); // Ensure correct visibility on page load
-    
+        toggleBacklogSection();
+
         addBacklogButton.addEventListener("click", function () {
             let backlogDiv = document.createElement("div");
             backlogDiv.classList.add("backlog-entry");
-            
             backlogDiv.innerHTML = `
                 <label>Subject Name:</label>
                 <input type="text" class="form-control subject-name">
-                
                 <label>Declared Fail:</label>
                 <input type="text" class="form-control declared-fail">
-                
                 <label>Declared Pass:</label>
                 <input type="text" class="form-control declared-pass">
-                
                 <button type="button" class="btn btn-danger remove-backlog">Remove</button>
             `;
-    
             backlogFormsContainer.appendChild(backlogDiv);
-            
-            // Add event listener for remove button
             backlogDiv.querySelector(".remove-backlog").addEventListener("click", function () {
                 backlogDiv.remove();
                 updateBacklogData();
             });
-    
             updateBacklogData();
         });
-    
+
         function updateBacklogData() {
             let backlogEntries = [];
             document.querySelectorAll(".backlog-entry").forEach(entry => {
                 let subject = entry.querySelector(".subject-name").value;
                 let failCount = entry.querySelector(".declared-fail").value;
                 let passCount = entry.querySelector(".declared-pass").value;
-    
                 if (subject) {
                     backlogEntries.push({
                         "subject_name": subject,
@@ -165,21 +220,20 @@
                     });
                 }
             });
-    
             backlogDataInput.value = JSON.stringify(backlogEntries);
         }
-    
+
         document.addEventListener("input", function (event) {
             if (event.target.closest(".backlog-entry")) {
                 updateBacklogData();
             }
         });
+
+        window.selectStudent = function(prn) {
+            document.querySelector("#query").value = prn;
+            document.getElementById("search-fetch-form").submit();
+        };
     });
-    </script>
-    
-
-
-
+</script>
 {% endif %}
-
 {% endblock %}

@@ -61,33 +61,54 @@ def download_certificate(request, certificate_id):
 @login_required(login_url='authentication:login')
 @user_passes_test(is_authorized, login_url='authentication:login')
 def bonafide_certificate(request):
-    fetch_student_form = FetchStudentForm()
     bonafide_form = None
     backlog_formset = BacklogFormSet()  # Always initialize the formset
     student_data = None
     has_backlogs = None  
     certificate = None
+    search_results = None
 
-    # Handle Fetching Student Details
-    if request.method == "POST" and "fetch_details" in request.POST:
-        fetch_student_form = FetchStudentForm(request.POST)
-        if fetch_student_form.is_valid():
-            prn = fetch_student_form.cleaned_data["PRN"]
-            student = Student.objects.filter(prn=prn).first()
+    # Helper function to check if certificate is already issued
+    def is_certificate_already_issued(student):
+        return Certificate.objects.filter(
+            issued_to=student,
+            certificate_type=Certificate.CertificateTypes.BC
+        ).exists()
+
+    # Helper function to get certificate download link
+    def get_certificate_link(student):
+        cert = Certificate.objects.filter(
+            issued_to=student,
+            certificate_type=Certificate.CertificateTypes.BC
+        ).first()
+        return f"/certificates/download-certificate/{cert.id}/" if cert else "#"
+
+    # Handle Single Field Input (Search or Fetch)
+    if request.method == "POST" and "search_or_fetch" in request.POST:
+        query = request.POST.get("query", "").strip()
+        if query:
+            # Check if the query matches a PRN exactly
+            student = Student.objects.filter(prn=query).first()
             if student:
                 if is_certificate_already_issued(student):
-                    fetch_student_form.add_error("PRN", mark_safe(f"Bonafide Certificate already issued for this student. <a href='{get_certificate_link(student)}'>Click Here to download.</a>"))
+                    messages.error(request, mark_safe(
+                        f"Bonafide Certificate already issued for this student. <a href='{get_certificate_link(student)}'>Click Here to download.</a>"
+                    ))
                 else:
                     student_data = get_student_initial_data(student)
                     bonafide_form = BonafideCertificateForm(initial=student_data)
             else:
-                fetch_student_form.add_error("PRN", "No student found with this PRN.")
+                # If no exact PRN match, search by name
+                search_results = Student.objects.filter(
+                    Q(user__first_name__icontains=query) |
+                    Q(user__last_name__icontains=query) |
+                    Q(erp__icontains=query)
+                )[:10]
 
     # Handle Backlog Confirmation
     elif request.method == "POST" and "confirm_backlogs" in request.POST:
         has_backlogs = request.POST.get("has_backlogs") == "yes"
         bonafide_form = BonafideCertificateForm(request.POST)
-        # Only bind the formset if there are backlogs
         backlog_formset = BacklogFormSet(request.POST if has_backlogs else None)
 
     # Handle Certificate Generation
@@ -108,7 +129,8 @@ def bonafide_certificate(request):
             bonafide_form = None
             student = get_object_or_404(Student, prn=student_data["PRN"])
             existing_certificate = Certificate.objects.filter(
-                issued_to=student, certificate_type=Certificate.CertificateTypes.BC
+                issued_to=student,
+                certificate_type=Certificate.CertificateTypes.BC
             ).first()
             if existing_certificate:
                 download_link = f"<a href='/certificates/download-certificate/{existing_certificate.id}/'>Click Here to download.</a>"
@@ -122,7 +144,7 @@ def bonafide_certificate(request):
                         file_path=certificate_path,
                         issued_by=request.user,
                         approval_status=Certificate.StatusChoices.APPROVED,
-                        details=f"Bonafide Certificate for {student_data['full_name']} PRN: {student_data['PRN']}"
+                        details=f"Bonafide Certificate for {student.user.first_name} {student.user.last_name} PRN: {student.prn}"
                     )
                     download_link = f"<a href='/certificates/download-certificate/{certificate.id}/'>Click Here to download.</a>"
                     messages.success(request, mark_safe(f"Bonafide Certificate generated successfully. {download_link}"))
@@ -130,12 +152,12 @@ def bonafide_certificate(request):
                     messages.error(request, "Failed to generate certificate. Please try again.")
 
     context = {
-        "fetch_student_form": fetch_student_form,
         "bonafide_form": bonafide_form,
         "backlog_formset": backlog_formset,
         "student_data": student_data,
         "has_backlogs": has_backlogs,
         "certificate": certificate,
+        "search_results": search_results,
     }
     return render(request, "certificates/bonafide_certificate.html", context)
 
