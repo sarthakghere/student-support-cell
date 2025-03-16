@@ -102,8 +102,9 @@ def bonafide_certificate(request):
                 search_results = Student.objects.filter(
                     Q(user__first_name__icontains=query) |
                     Q(user__last_name__icontains=query) |
-                    Q(erp__icontains=query)
-                )[:10]
+                    Q(erp__icontains=query) |
+                    Q(program__icontains=query)
+                )
 
     # Handle Backlog Confirmation
     elif request.method == "POST" and "confirm_backlogs" in request.POST:
