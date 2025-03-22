@@ -45,7 +45,7 @@ def generate_bonafide_certificate(student_data, backlogs: list):
             'backlog_semester': f"{backlogs[x].get('declared_fail')}",
             'passing_semester': f"{backlogs[x].get('declared_pass')}",
         })
-        semester_description = f"6th" if years == 3 else f"8th" if years == 4 else ""
+        semester_description = f"4th" if years == 2 else f"6th" if years == 3 else f"8th" if years == 4 else "10th" if years == 5 else ""
     else:
         semester_description = ""
 
