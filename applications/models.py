@@ -8,6 +8,7 @@ class StudentApplication(models.Model):
     erp = models.CharField(max_length=100)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
+    email = models.EmailField(max_length=100, null=True, blank=True)
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='applications', null=True, blank=True)
     application_type = models.CharField(max_length=100, null=False, blank=False)
     subject = models.CharField(max_length=256, null=True, blank=True)
