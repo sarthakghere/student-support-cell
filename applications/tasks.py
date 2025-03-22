@@ -26,7 +26,7 @@ def fetch_google_forms_data():
         prn = entry.get('PRN')
         student = Student.objects.filter(prn=prn).exists()
         application_type = entry.get('Application Type')
-        if application_type == 'General':
+        if application_type == StudentApplication.ApplicationTypesChoices.GENERAL:
             StudentApplication.objects.create(
                 prn=entry.get('PRN'),
                 erp=entry.get('ERP ID'),
@@ -38,7 +38,7 @@ def fetch_google_forms_data():
                 message=entry.get('Description'),
                 student = Student.objects.get(prn=prn) if student else None
             )
-        elif application_type == 'Certificate Issue Request':
+        elif application_type == StudentApplication.ApplicationTypesChoices.CERTIFICATE_ISSUE_REQUEST:
             certificate_type_map = {label: code for code, label in Certificate.CertificateTypes.choices}
             certificate_type = certificate_type_map.get(entry.get('Certificate Type'))
             StudentApplication.objects.create(
@@ -47,7 +47,6 @@ def fetch_google_forms_data():
                 first_name= Student.objects.get(prn=prn).user.first_name if student else entry.get('First Name'),
                 last_name= Student.objects.get(prn=prn).user.last_name if student else entry.get('Last Name'),
                 email= Student.objects.get(prn=prn).user.email if student else entry.get('Email Address'),
-                subject = "Certificate Issue Request",
                 application_type=application_type,
                 certificate_type=certificate_type,
                 student = Student.objects.get(prn=prn) if student else None
