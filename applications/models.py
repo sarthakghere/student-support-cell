@@ -8,6 +8,10 @@ class StudentApplication(models.Model):
     class StatusChoices(models.TextChoices):
         PENDING = 'Pending'
         RESOLVED = 'Resolved'
+    
+    class ApplicationTypesChoices(models.TextChoices):
+        GENERAL = 'General'
+        CERTIFICATE_ISSUE_REQUEST = 'Certificate Issue Request'
 
     prn = models.CharField(max_length=100)
     erp = models.CharField(max_length=100)
@@ -15,7 +19,7 @@ class StudentApplication(models.Model):
     last_name = models.CharField(max_length=100, null=True, blank=True)
     email = models.EmailField(max_length=100, null=True, blank=True)
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='applications', null=True, blank=True)
-    application_type = models.CharField(max_length=100, null=False, blank=False)
+    application_type = models.CharField(max_length=100, choices=ApplicationTypesChoices.choices, default=ApplicationTypesChoices.GENERAL)
     subject = models.CharField(max_length=256, null=True, blank=True)
     message = models.TextField(null=True, blank=True)
     certificate_type = models.CharField(max_length=100, null=True, blank=True, choices=Certificate.CertificateTypes.choices)
