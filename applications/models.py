@@ -4,6 +4,11 @@ from authentication.models import User
 
 # Create your models here.
 class StudentApplication(models.Model):
+
+    class StatusChoices(models.TextChoices):
+        PENDING = 'Pending'
+        RESOLVED = 'Resolved'
+
     prn = models.CharField(max_length=100)
     erp = models.CharField(max_length=100)
     first_name = models.CharField(max_length=100)
@@ -14,7 +19,7 @@ class StudentApplication(models.Model):
     subject = models.CharField(max_length=256, null=True, blank=True)
     message = models.TextField(null=True, blank=True)
     certificate_type = models.CharField(max_length=100, null=True, blank=True, choices=Certificate.CertificateTypes.choices)
-    status = models.CharField(max_length=100, default='Pending')
+    status = models.CharField(max_length=100, choices=StatusChoices.choices, default=StatusChoices.PENDING)
     managed_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name='managed_applications', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
