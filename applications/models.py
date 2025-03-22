@@ -12,7 +12,7 @@ class StudentApplication(models.Model):
     prn = models.CharField(max_length=100)
     erp = models.CharField(max_length=100)
     first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100, null=True, blank=True)
     email = models.EmailField(max_length=100, null=True, blank=True)
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='applications', null=True, blank=True)
     application_type = models.CharField(max_length=100, null=False, blank=False)
