@@ -18,7 +18,10 @@
                         <th scope="col">#</th>
                         <th scope="col">Name</th>
                         <th scope="col">PRN</th>
+                        <th scope="col">Application Type</th>
                         <th scope="col">Subject</th>
+                        <th scope="col">Received On</th>
+                        <th scope="col">Status</th>
                         <th scope="col">Actions</th>
                     </tr>
                 </thead>
@@ -26,14 +29,21 @@
                     {% for application in applications %}
                         <tr>
                             <th scope="row">{{ forloop.counter }}</th>
+                            <td>{{ application.first_name }}{% if application.last_name %} {{ application.last_name }}{% endif %}</td>
                             {% if application.student %}
-                                <td>{{ application.student.user.first_name }} {{ application.student.user.last_name }}</td>
                                 <td><a href="{% url 'students:view_student' application.student.id %}">{{ application.student.prn }}</a></td>
                             {% else %}
-                                <td>{{ application.first_name }} {{ application.last_name }}</td>
                                 <td>{{application.prn}}</td>
                             {% endif %}
-                            <td>{{ application.subject|truncatechars:23 }}</td>
+                            <td>{{ application.application_type }}</td>
+                            <td>{% if application.subject %} {{ application.subject|truncatechars:23 }} {% endif %}</td>
+                            <td>{{ application.created_at|date:"d M, Y" }}</td>
+                            <td>
+                                {% if application.status == 'Pending' %}
+                                    <span class="badge badge-warning">{{ application.status }}</span>
+                                {% elif application.status == 'Resolved' %}
+                                    <span class="badge badge-success">{{ application.status }}</span>
+                                {% endif %}
                             <td>
                                 <!-- View Button -->
                                 <a href="{% url 'applications:view_application' application.id %}" class="btn btn-info btn-sm">View</a>
