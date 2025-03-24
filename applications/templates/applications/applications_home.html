@@ -1,0 +1,39 @@
+{% extends 'authentication/base.html' %}
+
+{% block title %}Generate Certificate{% endblock %}
+
+{% block style %}
+
+    .col-md-6 {
+        margin-bottom: 20px;
+    }
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Student Applications</h5>
+                    <p class="card-text">View and approve student applications</p>
+                    <a href="{% url 'applications:list_applications' %}" class="btn btn-primary">Student Applications</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Archived Applications</h5>
+                    <p class="card-text">Manage Archived Applications</p>
+                    <a href="{% url 'applications:list_archived_applications' %}" class="btn btn-primary">Archived Applications</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

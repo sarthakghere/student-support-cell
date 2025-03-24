@@ -25,6 +25,7 @@ class StudentApplication(models.Model):
     certificate_type = models.CharField(max_length=100, null=True, blank=True, choices=Certificate.CertificateTypes.choices)
     status = models.CharField(max_length=100, choices=StatusChoices.choices, default=StatusChoices.PENDING)
     managed_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name='managed_applications', null=True, blank=True)
+    is_archived = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

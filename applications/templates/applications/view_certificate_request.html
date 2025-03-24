@@ -1,0 +1,47 @@
+{% extends 'authentication/base.html' %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h2 class="mb-4">Application Details</h2>
+
+        <!-- Staff Details -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <strong>Certificate Issue Request</strong>
+                <div>
+                    <a href="{% url 'applications:print_application' application.id %}" class="btn btn-warning btn-sm">Print</a>
+                    {% if application.is_archived %}
+                    <a href="{% url 'applications:unarchive_application' application.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to Unarchive this application?')">Unarchive</a>
+                    {% else %}
+                    <a href="{% url 'applications:archive_application' application.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to archive this application?')">Archive</a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body">
+                {% if application.student %}
+
+                <p><strong>Name:</strong> {{ application.student.user.first_name }} {{ application.student.user.last_name }}</p>
+                <p><strong>Email:</strong> {{ application.student.user.email }}</p>
+                <p><strong>PRN:</strong><a href="{% url 'students:view_student' application.student.id %}">{{ application.student.prn }}</a></p>
+                <p><strong>ERP ID:</strong> {{ application.student.erp }}</p>
+                {% else %}
+                <p><strong>Name:</strong> {{ application.first_name }} {{ application.last_name }}</p>
+                <p><strong>PRN:</strong> {{ application.prn }}</p>
+                <p><strong>ERP ID:</strong> {{ application.erp }}</p>
+                {% endif %} 
+
+                <br>
+                <br>
+                <p><strong>Subject:</strong>Certificate Issue Request</p>
+                <p><strong>Certificate Type:</strong> {{ application.get_certificate_type_display }}</p>
+                <br>
+                <br>
+                <p><strong>Received On:</strong> {{ application.created_at }}</p>
+
+
+            </div>
+        </div>
+
+    </div>
+{% endblock %}
+
